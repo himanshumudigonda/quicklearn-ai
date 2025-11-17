@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
 import { explainAPI } from '@/lib/api';
 import useStore from '@/lib/store';
 import toast from 'react-hot-toast';
 
 export default function SearchBar({ compact = false }) {
   const [query, setQuery] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const { setCurrentExplanation, setCurrentTopic, setIsLoading, user } = useStore();
 
   const handleSearch = async (e) => {
@@ -36,41 +37,52 @@ export default function SearchBar({ compact = false }) {
   return (
     <motion.form
       onSubmit={handleSearch}
-      className={`${compact ? 'mb-8' : 'mb-8'} w-full`}
+      className={`${compact ? 'mb-0' : 'mb-0'} w-full`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <div className="relative">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask anything... (e.g., Ohm's law, photosynthesis)"
-          className={`input pr-12 ${compact ? 'text-base' : 'text-lg'} shadow-lg`}
-          autoFocus={!compact}
-        />
-        <button
-          type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 btn-primary p-2.5 rounded-lg"
+      <div className="relative group">
+        <motion.div
+          className={`relative flex items-center ${
+            compact ? 'max-w-2xl mx-auto' : 'max-w-3xl mx-auto'
+          }`}
+          animate={{
+            scale: isFocused ? 1.02 : 1,
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
-          <Search className="w-5 h-5" />
-        </button>
-      </div>
-
-      {!compact && (
-        <div className="mt-4 flex flex-wrap gap-2 justify-center">
-          {['Photosynthesis', 'Quantum entanglement', 'Blockchain', 'DNA replication'].map((topic) => (
-            <button
-              key={topic}
-              type="button"
-              onClick={() => setQuery(topic)}
-              className="px-4 py-2 bg-white rounded-full text-sm text-neutral-700 hover:bg-primary-100 hover:text-primary-700 transition-colors shadow-sm"
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+          
+          <div className="relative flex w-full items-center bg-white rounded-2xl shadow-lg border-2 border-gray-200/50 focus-within:border-indigo-400 focus-within:shadow-xl transition-all duration-300">
+            <Sparkles className="ml-5 w-5 h-5 text-gray-400" />
+            
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder="Ask me anything..."
+              className={`flex-1 px-4 ${
+                compact ? 'py-4 text-base' : 'py-5 sm:py-6 text-base sm:text-lg'
+              } bg-transparent outline-none text-gray-900 placeholder-gray-400`}
+              autoFocus={!compact}
+            />
+            
+            <motion.button
+              type="submit"
+              className={`mr-2 ${
+                compact ? 'px-6 py-3' : 'px-8 py-3 sm:py-4'
+              } bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2 shadow-lg`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {topic}
-            </button>
-          ))}
-        </div>
-      )}
+              <Search className={compact ? 'w-4 h-4' : 'w-5 h-5'} />
+              {!compact && <span className="hidden sm:inline">Generate</span>}
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
     </motion.form>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, LogOut, RefreshCw, Sparkles } from 'lucide-react';
+import { User, LogOut, RefreshCw } from 'lucide-react';
 import useStore from '@/lib/store';
 import { signInWithGoogle, signOut } from '@/lib/auth';
 import { authAPI } from '@/lib/api';
@@ -18,10 +18,6 @@ export default function ProfileButton() {
       await signInWithGoogle();
       toast.success('Welcome to QuickLearn!', {
         icon: '🎉',
-        style: {
-          background: '#8B5CF6',
-          color: '#fff',
-        }
       });
     } catch (error) {
       console.error('Sign in error:', error);
@@ -62,27 +58,25 @@ export default function ProfileButton() {
       <motion.button 
         onClick={handleSignIn}
         disabled={isSigningIn}
-        className="relative px-6 py-3 rounded-full font-semibold text-white overflow-hidden group"
+        className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 group-hover:from-purple-500 group-hover:via-pink-500 group-hover:to-blue-500 transition-all"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 opacity-0 group-hover:opacity-100 blur-xl transition-opacity"></div>
-        <span className="relative z-10 flex items-center gap-2">
+        <span className="flex items-center gap-2">
           {isSigningIn ? (
             <>
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               >
-                <Sparkles className="w-5 h-5" />
+                <RefreshCw className="w-5 h-5" />
               </motion.div>
               Signing in...
             </>
           ) : (
             <>
               <User className="w-5 h-5" />
-              Sign in with Google
+              Sign in
             </>
           )}
         </span>
@@ -94,92 +88,92 @@ export default function ProfileButton() {
     <div className="relative">
       <motion.button
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:border-purple-400/50 transition-all"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
       >
         <motion.img
           src={avatarDataURI(avatarSeed)}
           alt="Avatar"
-          className="w-10 h-10 rounded-full ring-2 ring-purple-400/50"
-          whileHover={{ rotate: 360 }}
-          transition={{ duration: 0.5 }}
+          className="w-8 h-8 rounded-full"
+          whileHover={{ rotate: 15 }}
+          transition={{ duration: 0.3 }}
         />
-        <span className="font-semibold text-white">{nickname}</span>
+        <span className="font-semibold text-gray-900 hidden sm:inline">{nickname}</span>
       </motion.button>
 
       <AnimatePresence>
         {showMenu && (
           <>
-            {/* Backdrop with blur */}
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMenu(false)}
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
             />
 
             {/* Menu */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: -20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -20 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="absolute right-0 mt-4 w-80 bg-black/90 backdrop-blur-xl rounded-2xl border border-white/20 p-6 z-50 shadow-2xl"
+              className="absolute right-0 mt-3 w-80 bg-white rounded-2xl border border-gray-200 p-6 z-50 shadow-2xl"
             >
               {/* Profile Header */}
-              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/10">
+              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
                 <div className="relative">
                   <img
                     src={avatarDataURI(avatarSeed)}
                     alt="Avatar"
-                    className="w-16 h-16 rounded-full ring-2 ring-purple-400/50"
+                    className="w-16 h-16 rounded-full ring-2 ring-indigo-100"
                   />
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-black"></div>
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
                 </div>
                 <div className="flex-1">
-                  <p className="font-bold text-white text-lg">{nickname}</p>
-                  <p className="text-sm text-gray-400">{user.email}</p>
+                  <p className="font-bold text-gray-900 text-lg">{nickname}</p>
+                  <p className="text-sm text-gray-500 truncate">{user.email}</p>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <motion.button
                   onClick={handleRegenerateNickname}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/50 flex items-center gap-3 transition-all group"
-                  whileHover={{ scale: 1.02, x: 5 }}
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 flex items-center gap-3 transition-all group"
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30">
-                    <RefreshCw className="w-4 h-4 text-purple-400" />
+                  <div className="p-2 rounded-lg bg-indigo-100 group-hover:bg-indigo-200">
+                    <RefreshCw className="w-4 h-4 text-indigo-600" />
                   </div>
-                  <span className="text-white font-medium">New Nickname</span>
+                  <span className="text-gray-900 font-medium">New Nickname</span>
                 </motion.button>
 
                 <motion.button
                   onClick={handleRegenerateAvatar}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-400/50 flex items-center gap-3 transition-all group"
-                  whileHover={{ scale: 1.02, x: 5 }}
+                  className="w-full px-4 py-3 rounded-xl bg-gray-50 hover:bg-purple-50 border border-gray-100 hover:border-purple-200 flex items-center gap-3 transition-all group"
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="p-2 rounded-lg bg-blue-500/20 group-hover:bg-blue-500/30">
-                    <RefreshCw className="w-4 h-4 text-blue-400" />
+                  <div className="p-2 rounded-lg bg-purple-100 group-hover:bg-purple-200">
+                    <RefreshCw className="w-4 h-4 text-purple-600" />
                   </div>
-                  <span className="text-white font-medium">New Avatar</span>
+                  <span className="text-gray-900 font-medium">New Avatar</span>
                 </motion.button>
 
                 <motion.button
                   onClick={handleSignOut}
-                  className="w-full px-4 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-400/50 flex items-center gap-3 transition-all group"
-                  whileHover={{ scale: 1.02, x: 5 }}
+                  className="w-full px-4 py-3 rounded-xl bg-red-50 hover:bg-red-100 border border-red-100 hover:border-red-200 flex items-center gap-3 transition-all group"
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="p-2 rounded-lg bg-red-500/20 group-hover:bg-red-500/30">
-                    <LogOut className="w-4 h-4 text-red-400" />
+                  <div className="p-2 rounded-lg bg-red-100 group-hover:bg-red-200">
+                    <LogOut className="w-4 h-4 text-red-600" />
                   </div>
-                  <span className="text-red-400 font-medium">Sign Out</span>
+                  <span className="text-red-600 font-medium">Sign Out</span>
                 </motion.button>
               </div>
             </motion.div>

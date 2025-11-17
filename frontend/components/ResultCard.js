@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Copy, Download, Volume2, VolumeX, Star, CheckCircle } from 'lucide-react';
+import { Copy, Download, Volume2, VolumeX, Star, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { speakText, stopSpeech, copyToClipboard, downloadAsPDF } from '@/lib/utils';
 import useStore from '@/lib/store';
@@ -20,7 +20,6 @@ export default function ResultCard({ topic, content }) {
       speakText(text);
       setIsSpeaking(true);
       
-      // Reset after approximate duration
       setTimeout(() => setIsSpeaking(false), text.length * 50);
     }
   };
@@ -50,121 +49,145 @@ export default function ResultCard({ topic, content }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="card mt-8"
+      className="bg-white rounded-2xl border border-gray-200/50 shadow-xl overflow-hidden"
     >
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <h2 className="text-3xl font-bold text-neutral-900 capitalize">
+      {/* Header with gradient */}
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 sm:px-8 py-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white capitalize">
           {topic}
         </h2>
-        {content.verified && (
-          <span className="flex items-center gap-1 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
-            <CheckCircle className="w-4 h-4" />
-            Verified
-          </span>
-        )}
       </div>
 
-      {/* Content Sections */}
-      <div className="space-y-6">
-        {/* One-line definition */}
-        <section>
-          <h3 className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-2">
-            Definition
-          </h3>
-          <p className="text-lg text-neutral-800 font-medium">
-            {content.one_line}
-          </p>
-        </section>
-
-        {/* Explanation */}
-        <section>
-          <h3 className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-2">
-            Explanation
-          </h3>
-          <p className="text-neutral-700 leading-relaxed">
-            {content.explanation}
-          </p>
-        </section>
-
-        {/* Analogy */}
-        <section className="bg-primary-50 p-4 rounded-lg">
-          <h3 className="text-sm font-semibold text-primary-700 uppercase tracking-wide mb-2">
-            💡 Analogy
-          </h3>
-          <p className="text-neutral-700 italic">
-            {content.analogy}
-          </p>
-        </section>
-
-        {/* Example */}
-        <section>
-          <h3 className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-2">
-            Example
-          </h3>
-          <p className="text-neutral-700">
-            {content.example}
-          </p>
-        </section>
-
-        {/* Formula (if exists) */}
-        {content.formula && (
-          <section className="bg-neutral-100 p-4 rounded-lg">
-            <h3 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide mb-2">
-              Formula
-            </h3>
-            <p className="text-neutral-900 font-mono text-lg">
-              {content.formula}
+      <div className="px-6 sm:px-8 py-6 sm:py-8">
+        {/* Content Sections */}
+        <div className="space-y-6">
+          {/* One-line definition */}
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 bg-indigo-500 rounded-full"></div>
+              <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-wide">
+                Definition
+              </h3>
+            </div>
+            <p className="text-lg sm:text-xl text-gray-900 font-semibold leading-relaxed">
+              {content.one_line}
             </p>
           </section>
-        )}
 
-        {/* Quick Revision */}
-        <section className="bg-gradient-to-r from-primary-100 to-primary-50 p-4 rounded-lg border-l-4 border-primary-500">
-          <h3 className="text-sm font-semibold text-primary-700 uppercase tracking-wide mb-2">
-            ⚡ 10-Second Revision
-          </h3>
-          <p className="text-neutral-800 font-medium">
-            {content.revision_note}
-          </p>
-        </section>
-      </div>
+          {/* Explanation */}
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 bg-purple-500 rounded-full"></div>
+              <h3 className="text-sm font-bold text-purple-600 uppercase tracking-wide">
+                Detailed Explanation
+              </h3>
+            </div>
+            <p className="text-base text-gray-700 leading-relaxed">
+              {content.explanation}
+            </p>
+          </section>
 
-      {/* Action Buttons */}
-      <div className="mt-8 flex flex-wrap gap-3">
-        <button
-          onClick={handleSpeak}
-          className="btn-secondary flex items-center gap-2"
-        >
-          {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          {isSpeaking ? 'Stop' : 'Read Aloud'}
-        </button>
-        
-        <button
-          onClick={handleCopy}
-          className="btn-secondary flex items-center gap-2"
-        >
-          <Copy className="w-4 h-4" />
-          Copy
-        </button>
-        
-        <button
-          onClick={handleDownload}
-          className="btn-secondary flex items-center gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Download
-        </button>
-        
-        <button
-          onClick={handleFavorite}
-          className={`btn flex items-center gap-2 ${
-            isFav ? 'bg-primary-500 text-white' : 'btn-secondary'
-          }`}
-        >
-          <Star className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
-          {isFav ? 'Saved' : 'Save'}
-        </button>
+          {/* Analogy */}
+          <section className="bg-gradient-to-br from-indigo-50 to-purple-50 p-5 rounded-xl border border-indigo-100">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-5 h-5 text-indigo-600" />
+              <h3 className="text-sm font-bold text-indigo-700 uppercase tracking-wide">
+                Simple Analogy
+              </h3>
+            </div>
+            <p className="text-base text-gray-800 italic leading-relaxed">
+              {content.analogy}
+            </p>
+          </section>
+
+          {/* Example */}
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 bg-green-500 rounded-full"></div>
+              <h3 className="text-sm font-bold text-green-600 uppercase tracking-wide">
+                Real Example
+              </h3>
+            </div>
+            <p className="text-base text-gray-700 leading-relaxed">
+              {content.example}
+            </p>
+          </section>
+
+          {/* Formula (if exists) */}
+          {content.formula && (
+            <section className="bg-gray-100 p-5 rounded-xl">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-1 h-5 bg-gray-600 rounded-full"></div>
+                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                  Formula
+                </h3>
+              </div>
+              <p className="text-lg text-gray-900 font-mono bg-white p-3 rounded-lg border border-gray-200">
+                {content.formula}
+              </p>
+            </section>
+          )}
+
+          {/* Quick Revision */}
+          <section className="bg-gradient-to-r from-yellow-50 to-orange-50 p-5 rounded-xl border-l-4 border-orange-400">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">⚡</span>
+              <h3 className="text-sm font-bold text-orange-700 uppercase tracking-wide">
+                Quick Revision
+              </h3>
+            </div>
+            <p className="text-base text-gray-800 font-semibold leading-relaxed">
+              {content.revision_note}
+            </p>
+          </section>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-wrap gap-3">
+          <motion.button
+            onClick={handleSpeak}
+            className="px-5 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 flex items-center gap-2"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isSpeaking ? 'Stop' : 'Listen'}
+          </motion.button>
+          
+          <motion.button
+            onClick={handleCopy}
+            className="px-5 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 flex items-center gap-2"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Copy className="w-4 h-4" />
+            Copy
+          </motion.button>
+          
+          <motion.button
+            onClick={handleDownload}
+            className="px-5 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 flex items-center gap-2"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Download className="w-4 h-4" />
+            Download
+          </motion.button>
+          
+          <motion.button
+            onClick={handleFavorite}
+            className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+              isFav 
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' 
+                : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700'
+            }`}
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Star className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
+            {isFav ? 'Saved' : 'Save'}
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );
