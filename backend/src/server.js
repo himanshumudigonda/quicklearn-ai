@@ -52,14 +52,20 @@ async function start() {
     await setupRedis();
     logger.info('Redis connected');
 
-    // Start server
-    app.listen(PORT, () => {
-      logger.info(`QuickLearn AI Backend running on port ${PORT}`);
-      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
+    // Start server (skip for Vercel serverless)
+    if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+      app.listen(PORT, () => {
+        logger.info(`QuickLearn AI Backend running on port ${PORT}`);
+        logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      });
+    } else {
+      logger.info('Running in serverless mode (Vercel)');
+    }
   } catch (error) {
     logger.error('Failed to start server:', error);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }
 }
 
@@ -74,6 +80,7 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
+// Initialize on startup
 start();
 
 module.exports = app;
