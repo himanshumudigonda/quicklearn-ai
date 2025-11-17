@@ -1,0 +1,53 @@
+{
+  "name": "quicklearn-ai",
+  "version": "1.0.0",
+  "description": "QuickLearn AI - Learn anything in 1 minute with AI-powered explanations",
+  "private": true,
+  "scripts": {
+    "install:all": "npm run install:backend && npm run install:frontend && npm run install:mobile",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:mobile": "cd mobile && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:mobile": "cd mobile && npm start",
+    "dev:worker": "cd backend && npm run worker",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm install --production",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "seed": "cd backend && node scripts/seedTopics.js",
+    "docs": "echo 'Documentation available in: README.md, QUICKSTART.md, DEPLOYMENT.md, API.md, PROJECT_STRUCTURE.md, DOCS_INDEX.md'"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "education",
+    "ai",
+    "learning",
+    "explanations",
+    "student",
+    "quick-learn",
+    "multi-model",
+    "nextjs",
+    "express",
+    "react-native"
+  ],
+  "author": "QuickLearn AI Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/quicklearn-ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/quicklearn-ai/issues"
+  },
+  "homepage": "https://github.com/yourusername/quicklearn-ai#readme"
+}
