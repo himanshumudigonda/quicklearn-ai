@@ -404,11 +404,11 @@ MIT License - see [LICENSE](LICENSE) file
 - UI inspiration: Modern education platforms
 - Icons: Lucide, Ionicons
 
-## 📞 Support
+## 📞 Support & Feedback
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/quicklearn-ai/issues)
-- **Email**: support@quicklearn.ai
-- **Discord**: [Join our community](#)
+- **Issues**: [GitHub Issues](https://github.com/himanshumudigonda/quicklearn-ai/issues)
+- **Email**: mudigondahimanshu@gmail.com
+- **Feedback**: Send suggestions, bug reports, or feature requests to mudigondahimanshu@gmail.com
 
 ---
 
