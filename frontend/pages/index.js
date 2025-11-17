@@ -51,29 +51,31 @@ export default function Home() {
               background: `radial-gradient(circle 800px at ${mousePosition.x}px ${mousePosition.y}px, rgba(138, 43, 226, 0.15), transparent)`,
             }}
           />
-          {/* Animated particles */}
-          <div className="absolute inset-0">
-            {[...Array(50)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-purple-400 rounded-full"
-                initial={{ 
-                  x: Math.random() * window.innerWidth, 
-                  y: Math.random() * window.innerHeight,
-                  opacity: Math.random() * 0.5
-                }}
-                animate={{
-                  y: [null, Math.random() * window.innerHeight],
-                  opacity: [null, 0, Math.random() * 0.5],
-                }}
-                transition={{
-                  duration: Math.random() * 10 + 10,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-              />
-            ))}
-          </div>
+          {/* Animated particles - only render on client */}
+          {typeof window !== 'undefined' && (
+            <div className="absolute inset-0">
+              {[...Array(50)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1 h-1 bg-purple-400 rounded-full"
+                  initial={{ 
+                    x: Math.random() * window.innerWidth, 
+                    y: Math.random() * window.innerHeight,
+                    opacity: Math.random() * 0.5
+                  }}
+                  animate={{
+                    y: [null, Math.random() * window.innerHeight],
+                    opacity: [null, 0, Math.random() * 0.5],
+                  }}
+                  transition={{
+                    duration: Math.random() * 10 + 10,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Header */}
