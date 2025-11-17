@@ -20,6 +20,21 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Welcome route
+app.get('/', (req, res) => {
+  res.json({
+    name: 'QuickLearn AI API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      explain: 'POST /api/explain',
+      documentation: 'https://github.com/himanshumudigonda/quicklearn-ai'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check endpoint - works without any dependencies
 app.get('/health', (req, res) => {
   res.json({ 
