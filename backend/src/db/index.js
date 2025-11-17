@@ -4,6 +4,10 @@ const logger = require('../utils/logger');
 let pool;
 
 async function setupDatabase() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL not configured');
+  }
+  
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,

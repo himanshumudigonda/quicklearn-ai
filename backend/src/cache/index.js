@@ -4,6 +4,10 @@ const logger = require('../utils/logger');
 let redis;
 
 async function setupRedis() {
+  if (!process.env.REDIS_URL) {
+    throw new Error('REDIS_URL not configured');
+  }
+  
   redis = new Redis(process.env.REDIS_URL, {
     maxRetriesPerRequest: 3,
     retryStrategy(times) {

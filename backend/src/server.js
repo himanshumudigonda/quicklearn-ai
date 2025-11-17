@@ -44,13 +44,21 @@ app.use((req, res) => {
 // Initialize and start server
 async function start() {
   try {
-    // Initialize database
-    await setupDatabase();
-    logger.info('Database connected');
+    // Initialize database (optional - skip if no DATABASE_URL)
+    if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost')) {
+      await setupDatabase();
+      logger.info('Database connected');
+    } else {
+      logger.warn('Skipping database connection (DATABASE_URL not configured)');
+    }
 
-    // Initialize Redis
-    await setupRedis();
-    logger.info('Redis connected');
+    // Initialize Redis (optional - skip if no REDIS_URL)
+    if (process.env.REDIS_URL && !process.env.REDIS_URL.includes('localhost')) {
+      await setupRedis();
+      logger.info('Redis connected');
+    } else {
+      logger.warn('Skipping Redis connection (REDIS_URL not configured)');
+    }
 
     // Start server (skip for Vercel serverless)
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
