@@ -30,6 +30,9 @@ async function createTables() {
   try {
     await client.query('BEGIN');
 
+    // Ensure UUID generation functions are available (required for DEFAULT gen_random_uuid()).
+    await client.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
     // Users table
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (

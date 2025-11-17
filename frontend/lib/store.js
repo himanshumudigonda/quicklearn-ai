@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 const useStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       // User state
       user: null,
       nickname: null,
@@ -22,12 +22,15 @@ const useStore = create(
         set({ sessionToken: token });
       },
       
-      logout: () => set({
-        user: null,
-        nickname: null,
-        avatarSeed: null,
-        sessionToken: null,
-      }),
+      logout: () => {
+        localStorage.removeItem('session_token');
+        set({
+          user: null,
+          nickname: null,
+          avatarSeed: null,
+          sessionToken: null,
+        });
+      },
 
       // Current explanation state
       currentExplanation: null,
@@ -49,7 +52,7 @@ const useStore = create(
           favorites: state.favorites.filter((f) => f.topic !== topic),
         })),
       isFavorite: (topic) => {
-        const state = useStore.getState();
+        const state = get();
         return state.favorites.some((f) => f.topic === topic);
       },
     }),
