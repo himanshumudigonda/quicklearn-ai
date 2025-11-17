@@ -65,6 +65,7 @@ services:
     region: oregon
     plan: starter
     maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
 
 # Database
 databases:
