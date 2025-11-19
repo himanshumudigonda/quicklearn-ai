@@ -156,6 +156,8 @@ npm start
 
 ## 🌐 Deployment
 
+> Note (2025-11-19): Netlify config updated to rely on the official Next.js plugin. Do not add a catch-all SPA redirect (/* -> /index.html) or Next.js assets (/_next/*) will not load.
+
 ### Render (Recommended)
 
 1. **Fork/Clone** this repository
