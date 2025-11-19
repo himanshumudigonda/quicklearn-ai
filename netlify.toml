@@ -8,9 +8,3 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Redirects for SPA behavior
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
