@@ -20,40 +20,19 @@ import {
   Clock,
   Loader2
 } from 'lucide-react';
+import { explainAPI, verifyAPI } from '../lib/api';
 
-// --- MOCK API ---
+// --- MOCK API (Login Only) ---
 const mockApi = {
   login: () =>
     new Promise((resolve) =>
       setTimeout(() => {
-        const uid = 'mock-uid-' + Date.now();
+        const uid = 'user-' + Date.now();
         const nickname = makeNickname(uid);
         const avatarSeed = uid;
         resolve({ uid, nickname, avatarSeed });
       }, 600)
     ),
-  explain: (topic) =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        const normalized = topic.toLowerCase();
-        resolve({
-          topic: normalized,
-          source: 'mini',
-          content: {
-            one_line: `${topic} is a useful concept you can learn quickly.`,
-            explanation: `A concise, 1-minute explanation of ${topic}.`,
-            analogy: `Think of ${topic} as...`,
-            example: `Example: ${topic} in practice.`,
-            formula: '',
-            revision_note: `Quick takeaway about ${topic}.`,
-            verified: false
-          },
-          cached: false
-        });
-      }, 400)
-    ),
-  verify: (topic) =>
-    new Promise((resolve) => setTimeout(() => resolve({ job_id: 'mock-job-' + Date.now() }), 300))
 };
 
 // --- HELPERS ---
@@ -225,16 +204,26 @@ const MainScreen = ({ user, onSignOut }) => {
     if (e) e.preventDefault();
     if (!topic.trim()) return;
     setIsLoading(true); setExplanation(null);
-    const data = await mockApi.explain(topic);
-    setExplanation(data);
-    setIsLoading(false);
+    try {
+      const response = await explainAPI.explain(topic, user.uid);
+      setExplanation(response.data);
+    } catch (error) {
+      console.error("Search error:", error);
+      showToast("Failed to get explanation. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleVerify = async () => { 
     if (!explanation) return; 
-    await mockApi.verify(explanation.topic); 
-    setExplanation(prev => ({ ...prev, content: { ...prev.content, verified: true } })); 
-    showToast('Verified'); 
+    try {
+      await verifyAPI.verify(explanation.topic, user.uid); 
+      showToast('Verification requested! It will appear in "Recent" soon.'); 
+    } catch (error) {
+      console.error("Verify error:", error);
+      showToast("Failed to request verification");
+    }
   };
 
   const handleRegenerate = () => {
