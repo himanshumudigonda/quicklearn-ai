@@ -5,9 +5,8 @@ services:
     env: node
     region: oregon
     plan: free
-    root: backend
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: cd backend && npm install --production
+    startCommand: cd backend && node src/server.js
     envVars:
       - key: NODE_ENV
         value: production
