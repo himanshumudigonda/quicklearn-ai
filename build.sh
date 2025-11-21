@@ -2,6 +2,6 @@
 set -e
 echo "==> Installing backend dependencies..."
 cd backend
-npm ci --production
+npm install --production
 echo "==> Dependencies installed successfully!"
 
