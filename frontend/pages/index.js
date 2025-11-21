@@ -233,6 +233,18 @@ const LoginScreen = ({ onLogin, onGuestLogin, isLoading }) => (
   </div>
 );
 
+const mockLogin = () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        uid: 'guest-' + Date.now(),
+        name: 'Guest Explorer',
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`
+      });
+    }, 800);
+  });
+};
+
 // --- MAIN APP ---
 
 export default function App() {
