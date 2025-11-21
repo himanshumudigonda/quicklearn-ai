@@ -10,14 +10,14 @@ const groq = new Groq({
 const MODEL_CONFIGS = {
   // Compound models - primary for fast generation
   'compound-mini': {
-    name: 'llama-3.1-8b-instant', // Mapped to a real, fast model
-    temperature: 0.7,
+    name: 'groq/compound-mini',
+    temperature: 1.0,
     max_tokens: 1024,
     stream: false,
   },
   'compound': {
-    name: 'llama-3.3-70b-versatile', // Mapped to a powerful model
-    temperature: 0.7,
+    name: 'groq/compound',
+    temperature: 1.0,
     max_tokens: 1024,
     stream: false,
   },
@@ -169,6 +169,15 @@ async function callGroqModel(topic, modelAlias = 'compound-mini', existingConten
           description: `Use ${tool} capability`,
         },
       }));
+    }
+
+    // Add compound_custom parameter for compound models
+    if (config.name.includes('compound')) {
+      completionParams.compound_custom = {
+        tools: {
+          enabled_tools: ["web_search", "code_interpreter", "visit_website"]
+        }
+      };
     }
 
     logger.info(`Calling Groq model: ${config.name}`);
