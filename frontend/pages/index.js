@@ -6,7 +6,9 @@ import {
   ThumbsUp, ThumbsDown, RotateCcw, X, 
   ChevronRight, Loader2, Menu, User
 } from 'lucide-react';
-import { explainAPI, verifyAPI } from '../lib/api';
+import { explainAPI, verifyAPI, authAPI } from '../lib/api';
+import { auth, googleProvider } from '../lib/firebase';
+import { signInWithPopup } from 'firebase/auth';
 import { toast } from 'react-hot-toast';
 
 // --- UTILS ---
@@ -15,17 +17,6 @@ const gradients = {
   surface: "bg-gray-900/50 backdrop-blur-xl border border-white/10",
   glow: "shadow-[0_0_30px_rgba(124,58,237,0.3)]"
 };
-
-// --- MOCK AUTH (For Stability) ---
-const mockLogin = () => new Promise(resolve => {
-  setTimeout(() => {
-    resolve({
-      uid: 'user_' + Math.random().toString(36).substr(2, 9),
-      name: 'Explorer',
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`
-    });
-  }, 800);
-});
 
 // --- COMPONENTS ---
 
@@ -239,11 +230,26 @@ export default function App() {
   const handleLogin = async () => {
     setIsLoading(true);
     try {
-      const u = await mockLogin();
-      setUser(u);
+      // 1. Google Sign In
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+      
+      // 2. Backend Sync
+      const response = await authAPI.login(idToken);
+      
+      setUser({
+        uid: result.user.uid,
+        name: response.data.nickname || result.user.displayName,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${response.data.avatarSeed || result.user.uid}`
+      });
+      
+      // Save session
+      localStorage.setItem('session_token', response.data.sessionToken);
+      
       setView('search');
     } catch (err) {
-      toast.error("Login failed");
+      console.error("Login error:", err);
+      toast.error("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
