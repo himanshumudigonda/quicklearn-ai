@@ -630,7 +630,8 @@ export default function App() {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Could not generate explanation. Try again.");
+      const errorMessage = error.response?.data?.error || "Could not generate explanation. Try again.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

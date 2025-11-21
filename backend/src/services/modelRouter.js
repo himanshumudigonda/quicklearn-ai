@@ -9,28 +9,28 @@ const { validateExplanationResponse } = require('../utils/validation');
 const MODEL_CHAIN = [
   // Tier 1: Ultra-fast lightweight models
   { name: 'groq/compound-mini', provider: 'groq', model: 'compound-mini', cost: 1, tier: 'fast' },
-  
+
   // Tier 2: Fast with tools support
   { name: 'groq/compound', provider: 'groq', model: 'compound', cost: 2, tier: 'fast' },
-  
+
   // Tier 3: Medium-speed, good quality
   { name: 'qwen/qwen3-32b-instruct', provider: 'groq', model: 'qwen3-32b', cost: 3, tier: 'medium' },
   { name: 'meta-llama/llama-4-scout-17b', provider: 'groq', model: 'llama-4-scout-17b', cost: 3, tier: 'medium' },
   { name: 'meta-llama/llama-4-maverick-17b-128e', provider: 'groq', model: 'llama-4-maverick-17b-128e', cost: 3, tier: 'medium' },
-  
+
   // Tier 4: Specialized models
   { name: 'meta-llama/llama-guard-4-12b', provider: 'groq', model: 'llama-guard-4-12b', cost: 4, tier: 'medium' },
   { name: 'llama-3.1-8b-instant', provider: 'groq', model: 'llama-3.1-8b-instant', cost: 3, tier: 'fast' },
-  
+
   // Tier 5: Large versatile models
   { name: 'llama-3.3-70b-versatile', provider: 'groq', model: 'llama-3.3-70b-versatile', cost: 5, tier: 'powerful' },
   { name: 'moonshotai/kimi-k2-instruct', provider: 'groq', model: 'kimi-k2-instruct', cost: 5, tier: 'powerful' },
-  
+
   // Tier 6: Premium OpenAI models (via Groq)
   { name: 'openai/gpt-oss-20b', provider: 'groq', model: 'gpt-oss-20b', cost: 6, tier: 'powerful' },
   { name: 'openai/gpt-oss-safeguard-20b', provider: 'groq', model: 'gpt-oss-safeguard-20b', cost: 6, tier: 'powerful' },
   { name: 'openai/gpt-oss-120b', provider: 'groq', model: 'gpt-oss-120b', cost: 8, tier: 'premium' },
-  
+
   // Tier 7: Fallback OpenAI models (Direct)
   { name: 'openai/gpt-4o-mini', provider: 'openai', model: 'gpt-4o-mini', cost: 7, tier: 'powerful' },
   { name: 'openai/gpt-4o', provider: 'openai', model: 'gpt-4o', cost: 10, tier: 'premium' },
@@ -38,16 +38,16 @@ const MODEL_CHAIN = [
 
 // Track failed models (reset every hour)
 const failedModels = new Set();
-setInterval(() => failedModels.clear(), 3600000);
+setInterval(() => failedModels.clear(), 300000); // Clear every 5 minutes
 
 /**
  * Generate explanation using model fallback chain
  */
 async function generateExplanation(topic, options = {}) {
-  const { 
-    preferredModel = null, 
+  const {
+    preferredModel = null,
     skipCache = false,
-    maxRetries = 3 
+    maxRetries = 3
   } = options;
 
   let chain = [...MODEL_CHAIN];
@@ -64,11 +64,18 @@ async function generateExplanation(topic, options = {}) {
   chain = chain.filter(m => !failedModels.has(m.name));
 
   if (chain.length === 0) {
-    logger.error('All models exhausted or failed');
-    return {
-      success: false,
-      error: 'All models currently unavailable. Please try again later.',
-    };
+    // Emergency reset: If all models are marked failed, clear the list and try again immediately
+    if (failedModels.size > 0) {
+      logger.warn('All models marked as failed. Forcing emergency reset of failedModels list.');
+      failedModels.clear();
+      chain = [...MODEL_CHAIN]; // Re-populate chain
+    } else {
+      logger.error('All models exhausted or failed (and failedModels was empty)');
+      return {
+        success: false,
+        error: 'All models currently unavailable. Please try again later.',
+      };
+    }
   }
 
   // Try each model in order
@@ -101,7 +108,7 @@ async function generateExplanation(topic, options = {}) {
 
       // Success! Track usage and return
       await incrementModelCounter(modelConfig.name, result.tokensUsed || 100);
-      
+
       logger.info(`Successfully generated explanation with ${modelConfig.name}`);
 
       return {
