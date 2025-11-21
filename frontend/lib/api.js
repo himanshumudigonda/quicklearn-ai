@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use the environment variable, but fallback to the specific Vercel URL if missing
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://quicklearn-73m1su79p-himus-projects-71ab61e2.vercel.app';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://quicklearn-aeqs289s1-himus-projects-71ab61e2.vercel.app';
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
