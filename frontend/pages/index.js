@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Zap, Sparkles, BookOpen, Share2, 
   ThumbsUp, ThumbsDown, RotateCcw, X, 
-  ChevronRight, Loader2, Menu, User, Flame, Trophy, Download
+  ChevronRight, Loader2, Menu, User, Flame, Trophy, Download,
+  Mail, Send, Heart, Github, Twitter
 } from 'lucide-react';
 import { explainAPI, verifyAPI, authAPI, feedbackAPI } from '../lib/api';
 import { auth, googleProvider } from '../lib/firebase';
@@ -249,6 +250,101 @@ const SearchScreen = ({ user, onSearch, isLoading }) => {
   );
 };
 
+const Footer = () => {
+  const [feedbackText, setFeedbackText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (!feedbackText.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      // Using Formspree or mailto link
+      const mailtoLink = `mailto:infinitetsukuyomi035@gmail.com?subject=QuickLearn AI Feedback&body=${encodeURIComponent(feedbackText)}`;
+      window.location.href = mailtoLink;
+      
+      toast.success('Opening your email client! 📧');
+      setFeedbackText('');
+    } catch (error) {
+      toast.error('Could not open email client');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <footer className="relative bg-gradient-to-b from-transparent to-black/50 border-t border-white/5 mt-20">
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        {/* Feedback Section */}
+        <div className="mb-12">
+          <div className="max-w-2xl mx-auto text-center">
+            <h3 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
+              <Mail className="w-6 h-6 text-purple-400" />
+              Send us your feedback
+            </h3>
+            <p className="text-gray-400 mb-6">Help us improve QuickLearn AI</p>
+            <form onSubmit={handleFeedbackSubmit} className="flex gap-2">
+              <input
+                type="text"
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                placeholder="Share your thoughts, ideas, or report issues..."
+                className="flex-1 px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                disabled={isSubmitting}
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting || !feedbackText.trim()}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                Send
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Footer Content */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t border-white/5">
+          {/* Left - Logo & Copyright */}
+          <div className="flex flex-col items-center md:items-start gap-2">
+            <Logo />
+            <p className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} QuickLearn AI. All rights reserved.
+            </p>
+          </div>
+
+          {/* Center - Made with Love */}
+          <div className="flex items-center gap-2 text-gray-400 text-sm">
+            <span>Made with</span>
+            <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" />
+            <span>for learners worldwide</span>
+          </div>
+
+          {/* Right - Links */}
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/himanshumudigonda/quicklearn-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <Github className="w-5 h-5" />
+            </a>
+            <a
+              href="mailto:infinitetsukuyomi035@gmail.com"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <Mail className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
 const LoginScreen = ({ onLogin, isLoading }) => (
   <div className="min-h-screen flex items-center justify-center p-6 bg-black">
     <div className="text-center space-y-8">
@@ -426,6 +522,7 @@ export default function App() {
         {view === 'search' && (
           <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <SearchScreen user={user} onSearch={handleSearch} isLoading={isLoading} />
+            <Footer />
           </motion.div>
         )}
 
@@ -434,9 +531,10 @@ export default function App() {
             key="result"
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }}
-            className="min-h-screen flex items-center justify-center p-6 pt-24"
+            className="min-h-screen flex flex-col items-center justify-center p-6 pt-24"
           >
             <ExplanationCard data={result} onClose={handleCloseResult} user={user} />
+            <Footer />
           </motion.div>
         )}
       </AnimatePresence>
