@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Zap, Sparkles, BookOpen, Share2, 
   ThumbsUp, ThumbsDown, RotateCcw, X, 
-  ChevronRight, Loader2, Menu, User
+  ChevronRight, Loader2, Menu, User, Flame, Trophy, Download
 } from 'lucide-react';
 import { explainAPI, verifyAPI, authAPI } from '../lib/api';
 import { auth, googleProvider } from '../lib/firebase';
 import { signInWithPopup } from 'firebase/auth';
 import { toast } from 'react-hot-toast';
+import { getStreak, updateStreak, getStreakEmoji } from '../lib/streak';
+import { createMemeText } from '../lib/meme';
 
 // --- UTILS ---
 const gradients = {
@@ -33,6 +35,21 @@ const Logo = () => (
 
 const ExplanationCard = ({ data, onClose }) => {
   const { topic, content, source } = data;
+  
+  const handleGenerateMeme = () => {
+    const meme = createMemeText(topic, content);
+    const memeText = `${meme.title}\n\n${meme.subtitle}\n\n#QuickLearnAI #${topic.replace(/\s+/g, '')}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: `Learn ${topic}`,
+        text: memeText,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(memeText);
+      toast.success('Meme text copied! Share it on social media! 🎉');
+    }
+  };
   
   return (
     <motion.div 
@@ -90,14 +107,22 @@ const ExplanationCard = ({ data, onClose }) => {
       </div>
 
       {/* Footer Actions */}
-      <div className="p-6 bg-black/20 flex justify-between items-center">
+      <div className="p-6 bg-black/20 flex justify-between items-center flex-wrap gap-3">
         <div className="flex gap-2">
           <button className="p-2 hover:text-green-400 transition-colors"><ThumbsUp className="w-5 h-5" /></button>
           <button className="p-2 hover:text-red-400 transition-colors"><ThumbsDown className="w-5 h-5" /></button>
         </div>
-        <button className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
-          <Share2 className="w-4 h-4" /> Share
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleGenerateMeme}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
+          >
+            <Sparkles className="w-4 h-4" /> Generate Meme
+          </button>
+          <button className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
+            <Share2 className="w-4 h-4" /> Share
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -184,7 +209,7 @@ const SearchScreen = ({ user, onSearch, isLoading }) => {
   );
 };
 
-const LoginScreen = ({ onLogin, onGuestLogin, isLoading }) => (
+const LoginScreen = ({ onLogin, isLoading }) => (
   <div className="min-h-screen flex items-center justify-center p-6 bg-black">
     <div className="text-center space-y-8">
       <motion.div
@@ -214,30 +239,12 @@ const LoginScreen = ({ onLogin, onGuestLogin, isLoading }) => (
             </>
           )}
         </button>
-
-        <button
-          onClick={onGuestLogin}
-          disabled={isLoading}
-          className="w-full py-4 rounded-xl bg-white/10 text-white font-semibold text-lg hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
-        >
-          Continue as Guest
-        </button>
       </div>
     </div>
   </div>
 );
 
-const mockLogin = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        uid: 'guest-' + Date.now(),
-        name: 'Guest Explorer',
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`
-      });
-    }, 800);
-  });
-};
+
 
 // --- MAIN APP ---
 
@@ -246,6 +253,14 @@ export default function App() {
   const [view, setView] = useState('login'); // login, search, result
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [streak, setStreak] = useState({ currentStreak: 0, bestStreak: 0 });
+
+  useEffect(() => {
+    if (user) {
+      const streakData = getStreak(user.uid);
+      setStreak(streakData);
+    }
+  }, [user]);
 
   // Handle Login
   const handleLogin = async () => {
@@ -287,19 +302,7 @@ export default function App() {
     }
   };
 
-  const handleGuestLogin = async () => {
-    setIsLoading(true);
-    try {
-      const u = await mockLogin();
-      setUser(u);
-      setView('search');
-      toast.success("Welcome Guest!");
-    } catch (err) {
-      toast.error("Guest login failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   // Handle Search
   const handleSearch = async (topic) => {
@@ -309,6 +312,17 @@ export default function App() {
       const response = await explainAPI.explain(topic, user?.uid);
       setResult(response.data);
       setView('result');
+      
+      // Update streak when user learns something
+      const newStreak = updateStreak(user.uid);
+      setStreak(newStreak);
+      
+      // Show celebration for milestones
+      if (newStreak.currentStreak % 7 === 0) {
+        toast.success(`🔥 ${newStreak.currentStreak} day streak! You're on fire!`, { duration: 4000 });
+      } else if (newStreak.currentStreak > streak.currentStreak) {
+        toast.success(`${getStreakEmoji(newStreak.currentStreak)} Day ${newStreak.currentStreak} streak!`);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Could not generate explanation. Try again.");
@@ -327,6 +341,10 @@ export default function App() {
       <Head>
         <title>QuickLearn AI - Learn Fast</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Learn anything in 1 minute with AI-powered explanations" />
+        <meta name="theme-color" content="#7c3aed" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
       </Head>
 
       {/* Navbar (only when logged in) */}
@@ -336,6 +354,21 @@ export default function App() {
             <Logo />
           </div>
           <div className="pointer-events-auto flex items-center gap-4">
+            {/* Streak Display */}
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 rounded-full shadow-lg"
+            >
+              <Flame className="w-5 h-5 text-white" />
+              <span className="text-white font-bold text-lg">{streak.currentStreak}</span>
+              {streak.bestStreak > streak.currentStreak && (
+                <div className="flex items-center gap-1 ml-2 text-yellow-300">
+                  <Trophy className="w-4 h-4" />
+                  <span className="text-sm font-semibold">{streak.bestStreak}</span>
+                </div>
+              )}
+            </motion.div>
             <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
               <User className="w-5 h-5" />
             </button>
@@ -346,7 +379,7 @@ export default function App() {
       <AnimatePresence mode="wait">
         {view === 'login' && (
           <motion.div key="login" exit={{ opacity: 0 }}>
-            <LoginScreen onLogin={handleLogin} onGuestLogin={handleGuestLogin} isLoading={isLoading} />
+            <LoginScreen onLogin={handleLogin} isLoading={isLoading} />
           </motion.div>
         )}
 
