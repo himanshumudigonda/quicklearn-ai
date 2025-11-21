@@ -10,14 +10,14 @@ const groq = new Groq({
 const MODEL_CONFIGS = {
   // Compound models - primary for fast generation
   'compound-mini': {
-    name: 'groq/compound-mini',
-    temperature: 1.0,
+    name: 'llama-3.1-8b-instant', // Mapped to a real, fast model
+    temperature: 0.7,
     max_tokens: 1024,
     stream: false,
   },
   'compound': {
-    name: 'groq/compound',
-    temperature: 1.0,
+    name: 'llama-3.3-70b-versatile', // Mapped to a powerful model
+    temperature: 0.7,
     max_tokens: 1024,
     stream: false,
   },
