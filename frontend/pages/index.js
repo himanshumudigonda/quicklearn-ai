@@ -190,7 +190,7 @@ const SearchScreen = ({ user, onSearch, isLoading }) => {
   );
 };
 
-const LoginScreen = ({ onLogin, isLoading }) => (
+const LoginScreen = ({ onLogin, onGuestLogin, isLoading }) => (
   <div className="min-h-screen flex items-center justify-center p-6 bg-black">
     <div className="text-center space-y-8">
       <motion.div
@@ -207,13 +207,28 @@ const LoginScreen = ({ onLogin, isLoading }) => (
         <p className="text-gray-400">Your personal knowledge accelerator</p>
       </div>
 
-      <button
-        onClick={onLogin}
-        disabled={isLoading}
-        className="w-full max-w-xs mx-auto py-4 rounded-xl bg-white text-black font-bold text-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
-      >
-        {isLoading ? <Loader2 className="animate-spin" /> : 'Get Started'}
-      </button>
+      <div className="space-y-4 w-full max-w-xs mx-auto">
+        <button
+          onClick={onLogin}
+          disabled={isLoading}
+          className="w-full py-4 rounded-xl bg-white text-black font-bold text-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+        >
+          {isLoading ? <Loader2 className="animate-spin" /> : (
+            <>
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="G" />
+              Continue with Google
+            </>
+          )}
+        </button>
+
+        <button
+          onClick={onGuestLogin}
+          disabled={isLoading}
+          className="w-full py-4 rounded-xl bg-white/10 text-white font-semibold text-lg hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
+        >
+          Continue as Guest
+        </button>
+      </div>
     </div>
   </div>
 );
@@ -234,22 +249,47 @@ export default function App() {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
       
-      // 2. Backend Sync
-      const response = await authAPI.login(idToken);
+      let backendData = {};
+      try {
+        // 2. Backend Sync (Optional)
+        const response = await authAPI.login(idToken);
+        backendData = response.data;
+        localStorage.setItem('session_token', backendData.sessionToken);
+      } catch (backendError) {
+        console.warn("Backend sync failed, continuing in offline mode:", backendError);
+        toast.error("Connected in offline mode (Backend unavailable)");
+      }
       
       setUser({
         uid: result.user.uid,
-        name: response.data.nickname || result.user.displayName,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${response.data.avatarSeed || result.user.uid}`
+        name: backendData.nickname || result.user.displayName,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendData.avatarSeed || result.user.uid}`
       });
-      
-      // Save session
-      localStorage.setItem('session_token', response.data.sessionToken);
       
       setView('search');
     } catch (err) {
       console.error("Login error:", err);
-      toast.error("Login failed. Please try again.");
+      if (err.code === 'auth/popup-closed-by-user') {
+        toast.error("Login cancelled");
+      } else if (err.code === 'auth/unauthorized-domain') {
+        toast.error("Domain not authorized in Firebase Console");
+      } else {
+        toast.error("Login failed. Try Guest Mode.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    setIsLoading(true);
+    try {
+      const u = await mockLogin();
+      setUser(u);
+      setView('search');
+      toast.success("Welcome Guest!");
+    } catch (err) {
+      toast.error("Guest login failed");
     } finally {
       setIsLoading(false);
     }
@@ -300,7 +340,7 @@ export default function App() {
       <AnimatePresence mode="wait">
         {view === 'login' && (
           <motion.div key="login" exit={{ opacity: 0 }}>
-            <LoginScreen onLogin={handleLogin} isLoading={isLoading} />
+            <LoginScreen onLogin={handleLogin} onGuestLogin={handleGuestLogin} isLoading={isLoading} />
           </motion.div>
         )}
 
