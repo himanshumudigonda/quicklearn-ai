@@ -132,59 +132,59 @@ const ExplanationCard = ({ data, onClose, user }) => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className={`w-full max-w-2xl mx-auto ${gradients.surface} rounded-3xl overflow-hidden shadow-2xl relative`}
+      className={`w-full max-w-2xl mx-auto ${gradients.surface} rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl relative`}
     >
       {/* Header */}
-      <div className="p-8 border-b border-white/10 relative overflow-hidden">
+      <div className="p-4 md:p-8 border-b border-white/10 relative overflow-hidden">
         <div className={`absolute top-0 right-0 w-64 h-64 bg-purple-500/20 blur-[100px] rounded-full pointer-events-none`} />
         <div className="relative z-10 flex justify-between items-start">
-          <div>
-            <h2 className="text-4xl font-bold text-white mb-2">{topic}</h2>
+          <div className="flex-1 pr-4">
+            <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 break-words">{topic}</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-            <X className="w-6 h-6 text-gray-400" />
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
+            <X className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-8 space-y-8">
+      <div className="p-4 md:p-8 space-y-6 md:space-y-8">
         <section>
-          <h3 className="text-sm font-semibold text-purple-400 uppercase tracking-wider mb-3">Definition</h3>
-          <p className="text-xl text-gray-100 leading-relaxed font-medium">
+          <h3 className="text-xs md:text-sm font-semibold text-purple-400 uppercase tracking-wider mb-3">Definition</h3>
+          <p className="text-lg md:text-xl text-gray-100 leading-relaxed font-medium">
             {content.one_line}
           </p>
         </section>
 
         <section>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-blue-400 uppercase tracking-wider mb-3">
+          <h3 className="flex items-center gap-2 text-xs md:text-sm font-semibold text-blue-400 uppercase tracking-wider mb-3">
             <BookOpen className="w-4 h-4" /> Simple Explanation
           </h3>
-          <p className="text-gray-300 leading-relaxed">
+          <p className="text-sm md:text-base text-gray-300 leading-relaxed">
             {content.explanation}
           </p>
         </section>
 
-        <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-pink-400 uppercase tracking-wider mb-3">
+        <div className="bg-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5">
+          <h3 className="flex items-center gap-2 text-xs md:text-sm font-semibold text-pink-400 uppercase tracking-wider mb-3">
             <Zap className="w-4 h-4" /> Analogy
           </h3>
-          <p className="text-gray-300 leading-relaxed italic">
+          <p className="text-sm md:text-base text-gray-300 leading-relaxed italic">
             "{content.analogy}"
           </p>
         </div>
 
         {content.example && (
-          <section className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-6 rounded-2xl border border-white/5">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Real World Example</h3>
-            <p className="text-gray-200">{content.example}</p>
+          <section className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5">
+            <h3 className="text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Real World Example</h3>
+            <p className="text-sm md:text-base text-gray-200">{content.example}</p>
           </section>
         )}
       </div>
 
       {/* Footer Actions */}
-      <div className="p-6 bg-black/20 flex justify-between items-center flex-wrap gap-3">
-        <div className="flex gap-2">
+      <div className="p-4 md:p-6 bg-black/20 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+        <div className="flex gap-2 justify-center sm:justify-start">
           <button 
             onClick={() => handleLike('like')}
             className={`p-2 transition-all ${
@@ -206,16 +206,16 @@ const ExplanationCard = ({ data, onClose, user }) => {
             <ThumbsDown className={`w-5 h-5 ${liked === 'dislike' ? 'fill-current' : ''}`} />
           </button>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button 
             onClick={handleGenerateMeme}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity w-full sm:w-auto"
           >
             <Sparkles className="w-4 h-4" /> Generate Meme
           </button>
           <button 
             onClick={handleShare}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors border border-white/10 rounded-lg hover:border-white/20"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-colors border border-white/10 rounded-lg hover:border-white/20 w-full sm:w-auto"
           >
             <Share2 className="w-4 h-4" /> Share
           </button>
@@ -245,13 +245,13 @@ const SearchScreen = ({ user, onSearch, isLoading }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-4 md:mb-6 tracking-tight leading-tight">
             Learn anything in <br />
             <span className={`bg-clip-text text-transparent bg-gradient-to-r ${gradients.primary}`}>
               60 Seconds
             </span>
           </h1>
-          <p className="text-xl text-gray-400 mb-12 max-w-xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-8 md:mb-12 max-w-xl mx-auto px-4">
             The fastest way to understand complex topics. Powered by advanced AI.
           </p>
         </motion.div>
@@ -261,25 +261,25 @@ const SearchScreen = ({ user, onSearch, isLoading }) => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
           onSubmit={handleSubmit}
-          className={`w-full ${gradients.surface} p-2 rounded-2xl flex items-center shadow-2xl transition-all focus-within:ring-2 ring-purple-500/50`}
+          className={`w-full ${gradients.surface} p-2 rounded-xl md:rounded-2xl flex items-center shadow-2xl transition-all focus-within:ring-2 ring-purple-500/50`}
         >
-          <div className="p-4">
-            <Search className="w-6 h-6 text-gray-400" />
+          <div className="p-2 md:p-4">
+            <Search className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
           </div>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="What do you want to learn? (e.g. Quantum Physics, ROI, Photosynthesis)"
-            className="w-full bg-transparent text-xl text-white placeholder-gray-500 focus:outline-none h-12"
+            placeholder="What do you want to learn?"
+            className="w-full bg-transparent text-base md:text-xl text-white placeholder-gray-500 focus:outline-none h-10 md:h-12 pr-2"
             autoFocus
           />
           <button 
             type="submit"
             disabled={isLoading || !query.trim()}
-            className={`px-8 py-3 rounded-xl bg-gradient-to-r ${gradients.primary} text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
+            className={`px-4 md:px-8 py-2.5 md:py-3 rounded-lg md:rounded-xl bg-gradient-to-r ${gradients.primary} text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0`}
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+            {isLoading ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" /> : <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />}
             <span className="hidden md:inline">Explain</span>
           </button>
         </motion.form>
@@ -335,27 +335,27 @@ const Footer = () => {
         {/* Feedback Section */}
         <div className="mb-12">
           <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
-              <Mail className="w-6 h-6 text-purple-400" />
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
+              <Mail className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
               Send us your feedback
             </h3>
-            <p className="text-gray-400 mb-6">Help us improve QuickLearn AI</p>
-            <form onSubmit={handleFeedbackSubmit} className="flex gap-2">
+            <p className="text-sm md:text-base text-gray-400 mb-4 md:mb-6">Help us improve QuickLearn AI</p>
+            <form onSubmit={handleFeedbackSubmit} className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="Share your thoughts, ideas, or report issues..."
-                className="flex-1 px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                placeholder="Share your thoughts..."
+                className="flex-1 px-4 md:px-6 py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors text-sm md:text-base"
                 disabled={isSubmitting}
               />
               <button
                 type="submit"
                 disabled={isSubmitting || !feedbackText.trim()}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-2.5 md:py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 <Send className="w-4 h-4" />
-                Send
+                <span>Send</span>
               </button>
             </form>
           </div>
@@ -617,23 +617,23 @@ export default function App() {
 
       {/* Navbar (only when logged in) */}
       {user && (
-        <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center pointer-events-none">
-          <div className="pointer-events-auto">
+        <nav className="fixed top-0 left-0 right-0 z-50 p-3 md:p-6 flex justify-between items-center pointer-events-none">
+          <div className="pointer-events-auto scale-75 md:scale-100 origin-left">
             <Logo />
           </div>
-          <div className="pointer-events-auto flex items-center gap-4">
+          <div className="pointer-events-auto flex items-center gap-2 md:gap-4">
             {/* Streak Display */}
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 rounded-full shadow-lg"
+              className="flex items-center gap-1.5 md:gap-2 bg-gradient-to-r from-orange-500 to-red-500 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg"
             >
-              <Flame className="w-5 h-5 text-white" />
-              <span className="text-white font-bold text-lg">{streak.currentStreak}</span>
+              <Flame className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              <span className="text-white font-bold text-sm md:text-lg">{streak.currentStreak}</span>
               {streak.bestStreak > streak.currentStreak && (
-                <div className="flex items-center gap-1 ml-2 text-yellow-300">
-                  <Trophy className="w-4 h-4" />
-                  <span className="text-sm font-semibold">{streak.bestStreak}</span>
+                <div className="flex items-center gap-1 ml-1 md:ml-2 text-yellow-300">
+                  <Trophy className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="text-xs md:text-sm font-semibold">{streak.bestStreak}</span>
                 </div>
               )}
             </motion.div>
@@ -665,7 +665,7 @@ export default function App() {
             key="result"
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }}
-            className="min-h-screen flex flex-col items-center justify-center p-6 pt-24"
+            className="min-h-screen flex flex-col items-center justify-center p-3 md:p-6 pt-20 md:pt-24"
           >
             <ExplanationCard data={result} onClose={handleCloseResult} user={user} />
             <Footer />
