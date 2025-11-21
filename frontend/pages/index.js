@@ -1,315 +1,321 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Zap,
-  Search,
-  Volume2,
-  Copy,
-  Heart,
-  CheckCircle,
-  Bookmark,
-  Compass,
-  X,
-  RefreshCw,
-  LogOut,
-  AlignLeft,
-  GitPullRequest,
-  Eye,
-  BarChart2,
-  Clock,
-  Loader2
+import { 
+  Search, Zap, Sparkles, BookOpen, Share2, 
+  ThumbsUp, ThumbsDown, RotateCcw, X, 
+  ChevronRight, Loader2, Menu, User
 } from 'lucide-react';
 import { explainAPI, verifyAPI } from '../lib/api';
+import { toast } from 'react-hot-toast';
 
-// --- MOCK API (Login Only) ---
-const mockApi = {
-  login: () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        const uid = 'user-' + Date.now();
-        const nickname = makeNickname(uid);
-        const avatarSeed = uid;
-        resolve({ uid, nickname, avatarSeed });
-      }, 600)
-    ),
+// --- UTILS ---
+const gradients = {
+  primary: "from-blue-500 via-purple-500 to-pink-500",
+  surface: "bg-gray-900/50 backdrop-blur-xl border border-white/10",
+  glow: "shadow-[0_0_30px_rgba(124,58,237,0.3)]"
 };
 
-// --- HELPERS ---
-const ADJS = ['Turbo', 'Silly', 'Cosmic', 'Nimble', 'Pixel', 'Mango', 'Zippy', 'Bouncy', 'Giga', 'Fuzzy', 'Clever', 'Bright', 'Quick', 'Wise'];
-const NOUNS = ['Papaya', 'Otter', 'Noodle', 'Robot', 'Marshmallow', 'Penguin', 'Cactus', 'Comet', 'Waffle', 'Squirrel', 'Koala', 'Panda', 'Rocket'];
-
-function hashToInt(str) {
-  let h = 5381;
-  for (let i = 0; i < str.length; i++) h = ((h << 5) + h) + str.charCodeAt(i);
-  return Math.abs(h);
-}
-
-function makeNickname(seed) {
-  const h = hashToInt(seed);
-  const a = ADJS[h % ADJS.length];
-  const n = NOUNS[Math.floor(h / ADJS.length) % NOUNS.length];
-  const num = (h % 1000).toString().padStart(3, '0');
-  return `${a}-${n}-${num}`;
-}
-
-function avatarDataURI(seed) {
-  const h = hashToInt(seed.toString());
-  const bg = ['#FFD966', '#F28C8C', '#9AD3BC', '#C6B1E1', '#FFD9A6', '#A0E7E5', '#FDACAC', '#B4E1FF'][h % 8];
-  const s1 = (h >> 3) % 360;
-  const s2 = (h >> 7) % 360;
-  const shapeType = h % 3;
-  let shape1, shape2;
-  if (shapeType === 0) {
-    shape1 = `<circle cx='22' cy='22' r='10' fill='hsl(${s1},70%,60%)' opacity='0.9'/>`;
-    shape2 = `<rect x='36' y='36' width='14' height='14' rx='3' fill='hsl(${s2},70%,60%)' opacity='0.9'/>`;
-  } else if (shapeType === 1) {
-    shape1 = `<rect x='16' y='16' width='14' height='14' rx='3' fill='hsl(${s1},70%,60%)' opacity='0.9' transform='rotate(15 23 23)'/>`;
-    shape2 = `<path d='M 32 32 L 48 32 L 40 48 Z' fill='hsl(${s2},70%,60%)' opacity='0.9'/>`;
-  } else {
-    shape1 = `<path d='M 16 30 L 32 16 L 32 30 Z' fill='hsl(${s1},70%,60%)' opacity='0.9'/>`;
-    shape2 = `<circle cx='40' cy='40' r='10' fill='hsl(${s2},70%,60%)' opacity='0.9'/>`;
-  }
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='${bg}'/>${shape1}${shape2}</svg>`;
-  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-}
-
-function speakText(text, onEnd) {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.onend = onEnd; u.lang = 'en-US'; u.rate = 1; u.pitch = 1; window.speechSynthesis.speak(u);
-}
+// --- MOCK AUTH (For Stability) ---
+const mockLogin = () => new Promise(resolve => {
+  setTimeout(() => {
+    resolve({
+      uid: 'user_' + Math.random().toString(36).substr(2, 9),
+      name: 'Explorer',
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`
+    });
+  }, 800);
+});
 
 // --- COMPONENTS ---
-const Spinner = ({ size = 'h-12 w-12' }) => <Loader2 className={`${size} text-amber-500 animate-spin`} />;
 
-const ResultSkeleton = () => (
-  <div className="bg-slate-800/60 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-lg space-y-4 animate-pulse">
-    <div className="h-6 bg-slate-700 rounded-md w-3/4"></div>
-    <div className="h-4 bg-slate-700 rounded-md w-full"></div>
-    <div className="h-4 bg-slate-700 rounded-md w-5/6"></div>
+const Logo = () => (
+  <div className="flex items-center gap-2">
+    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradients.primary} flex items-center justify-center shadow-lg`}>
+      <Zap className="text-white w-6 h-6 fill-current" />
+    </div>
+    <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+      QuickLearn
+    </span>
   </div>
 );
 
-const ResultSection = ({ title, content }) => {
-  if (!content) return null;
-  const icons = { Spark: <Zap className='w-5 h-5 text-amber-400' />, Explanation: <AlignLeft className='w-5 h-5 text-amber-400' /> };
-  return (
-    <div>
-      <div className='flex items-center space-x-2'>{icons[title] || <CheckCircle className='w-5 h-5 text-amber-400' />}<h4 className='text-sm text-slate-400 uppercase tracking-wide'>{title}</h4></div>
-      <p className='text-slate-100 mt-2'>{content}</p>
-    </div>
-  );
-};
-
-const ResultCard = ({ data, onVerify, showToast }) => {
-  const { topic, content } = data;
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-  const text = [topic, content.one_line, content.explanation].filter(Boolean).join('. ');
+const ExplanationCard = ({ data, onClose }) => {
+  const { topic, content, source } = data;
   
-  const handleSpeak = () => { 
-    if (isSpeaking) { 
-      window.speechSynthesis.cancel(); 
-      setIsSpeaking(false); 
-    } else { 
-      setIsSpeaking(true); 
-      speakText(text, () => setIsSpeaking(false)); 
-    } 
-  };
-  
-  const handleCopy = () => { 
-    navigator.clipboard?.writeText(text); 
-    showToast('Copied!'); 
-  };
-  
-  const handleSave = () => { 
-    setIsSaved(!isSaved); 
-    showToast(isSaved ? 'Removed' : 'Saved'); 
-  };
-
   return (
-    <div className='bg-slate-800/70 p-6 rounded-2xl shadow-md'>
-      <div className='flex items-start justify-between'>
-        <div>
-          <h3 className='text-2xl font-bold text-white'>{topic}</h3>
-          <p className='text-slate-400 mt-1'>{content.one_line}</p>
-        </div>
-        <div className='flex gap-2'>
-          <button onClick={handleSpeak} className='text-slate-400 hover:text-amber-400'><Volume2 /></button>
-          <button onClick={handleCopy} className='text-slate-400 hover:text-amber-400'><Copy /></button>
-          <button onClick={handleSave} className='text-slate-400 hover:text-red-500'><Heart className={isSaved ? 'text-red-500' : ''} /></button>
-        </div>
-      </div>
-      <div className='mt-4 space-y-4'>
-        <ResultSection title='Explanation' content={content.explanation} />
-        <ResultSection title='Analogy' content={content.analogy} />
-        <ResultSection title='Example' content={content.example} />
-      </div>
-      {!content.verified && (
-        <div className='mt-4'>
-          <button onClick={onVerify} className='w-full bg-white text-slate-900 rounded-lg py-3'>Request Verified Answer</button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ProfileModal = ({ user, onClose, onRegenerate, onSignOut, show }) => {
-  if (!show || !user) return null;
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className='fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm'>
-          <div className='bg-gray-800 p-6 rounded-2xl text-white relative'>
-            <button onClick={onClose} className='absolute top-4 right-4 text-slate-400 hover:text-white'><X /></button>
-            <div className='flex flex-col items-center'>
-              <img src={avatarDataURI(user.avatarSeed)} alt='avatar' className='w-24 h-24 rounded-2xl mb-4' />
-              <h3 className='text-xl font-semibold'>{user.nickname}</h3>
-              <div className='flex gap-2 mt-4'>
-                <button onClick={onRegenerate} className='px-3 py-2 bg-white/10 rounded flex items-center gap-2'><RefreshCw size={16}/> Regenerate</button>
-                <button onClick={onSignOut} className='px-3 py-2 bg-red-500/20 text-red-400 rounded flex items-center gap-2'><LogOut size={16}/> Sign Out</button>
-              </div>
+    <motion.div 
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className={`w-full max-w-2xl mx-auto ${gradients.surface} rounded-3xl overflow-hidden shadow-2xl relative`}
+    >
+      {/* Header */}
+      <div className="p-8 border-b border-white/10 relative overflow-hidden">
+        <div className={`absolute top-0 right-0 w-64 h-64 bg-purple-500/20 blur-[100px] rounded-full pointer-events-none`} />
+        <div className="relative z-10 flex justify-between items-start">
+          <div>
+            <h2 className="text-4xl font-bold text-white mb-2">{topic}</h2>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Generated by {source || 'AI'}</span>
             </div>
           </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <X className="w-6 h-6 text-gray-400" />
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-8 space-y-8">
+        <section>
+          <h3 className="text-sm font-semibold text-purple-400 uppercase tracking-wider mb-3">In a Nutshell</h3>
+          <p className="text-xl text-gray-100 leading-relaxed font-medium">
+            {content.one_line}
+          </p>
+        </section>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-blue-400 uppercase tracking-wider mb-3">
+              <BookOpen className="w-4 h-4" /> The Concept
+            </h3>
+            <p className="text-gray-300 leading-relaxed">
+              {content.explanation}
+            </p>
+          </div>
+
+          <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-pink-400 uppercase tracking-wider mb-3">
+              <Zap className="w-4 h-4" /> Analogy
+            </h3>
+            <p className="text-gray-300 leading-relaxed italic">
+              "{content.analogy}"
+            </p>
+          </div>
+        </div>
+
+        {content.example && (
+          <section className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-6 rounded-2xl border border-white/5">
+            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Real World Example</h3>
+            <p className="text-gray-200">{content.example}</p>
+          </section>
+        )}
+      </div>
+
+      {/* Footer Actions */}
+      <div className="p-6 bg-black/20 flex justify-between items-center">
+        <div className="flex gap-2">
+          <button className="p-2 hover:text-green-400 transition-colors"><ThumbsUp className="w-5 h-5" /></button>
+          <button className="p-2 hover:text-red-400 transition-colors"><ThumbsDown className="w-5 h-5" /></button>
+        </div>
+        <button className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
+          <Share2 className="w-4 h-4" /> Share
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+const SearchScreen = ({ user, onSearch, isLoading }) => {
+  const [query, setQuery] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) onSearch(query);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
+
+      <div className="w-full max-w-3xl relative z-10 flex flex-col items-center text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
+            Learn anything in <br />
+            <span className={`bg-clip-text text-transparent bg-gradient-to-r ${gradients.primary}`}>
+              60 Seconds
+            </span>
+          </h1>
+          <p className="text-xl text-gray-400 mb-12 max-w-xl mx-auto">
+            The fastest way to understand complex topics. Powered by advanced AI.
+          </p>
         </motion.div>
-      )}
-    </AnimatePresence>
+
+        <motion.form 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          onSubmit={handleSubmit}
+          className={`w-full ${gradients.surface} p-2 rounded-2xl flex items-center shadow-2xl transition-all focus-within:ring-2 ring-purple-500/50`}
+        >
+          <div className="p-4">
+            <Search className="w-6 h-6 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="What do you want to learn? (e.g. Quantum Physics, ROI, Photosynthesis)"
+            className="w-full bg-transparent text-xl text-white placeholder-gray-500 focus:outline-none h-12"
+            autoFocus
+          />
+          <button 
+            type="submit"
+            disabled={isLoading || !query.trim()}
+            className={`px-8 py-3 rounded-xl bg-gradient-to-r ${gradients.primary} text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
+          >
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+            <span className="hidden md:inline">Explain</span>
+          </button>
+        </motion.form>
+
+        {/* Suggestions */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 flex flex-wrap justify-center gap-3"
+        >
+          {['Black Holes', 'Compound Interest', 'Machine Learning', 'The Renaissance'].map((tag) => (
+            <button
+              key={tag}
+              onClick={() => onSearch(tag)}
+              className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:bg-white/10 hover:border-white/20 transition-all"
+            >
+              {tag}
+            </button>
+          ))}
+        </motion.div>
+      </div>
+    </div>
   );
 };
 
 const LoginScreen = ({ onLogin, isLoading }) => (
-  <div className='min-h-screen flex items-center justify-center p-6'>
-    <div className='max-w-md w-full text-center'>
-      <div className='w-20 h-20 bg-gradient-to-r from-amber-500 to-amber-400 rounded-3xl mx-auto flex items-center justify-center shadow'>
-        <Zap className='w-6 h-6 text-white' />
+  <div className="min-h-screen flex items-center justify-center p-6 bg-black">
+    <div className="text-center space-y-8">
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/20"
+      >
+        <Zap className="w-12 h-12 text-white" />
+      </motion.div>
+      
+      <div>
+        <h1 className="text-4xl font-bold text-white mb-2">QuickLearn AI</h1>
+        <p className="text-gray-400">Your personal knowledge accelerator</p>
       </div>
-      <h1 className='text-4xl text-white font-bold mt-6'>QuickLearn AI</h1>
-      <p className='text-slate-400 mt-2'>Get 1-minute explanations for any topic. Instantly.</p>
-      {isLoading ? <div className='mt-10 flex justify-center'><Spinner /></div> : <button onClick={onLogin} className='mt-10 w-full bg-white text-slate-700 py-3 rounded-lg font-semibold'>Sign in (mock)</button>}
+
+      <button
+        onClick={onLogin}
+        disabled={isLoading}
+        className="w-full max-w-xs mx-auto py-4 rounded-xl bg-white text-black font-bold text-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+      >
+        {isLoading ? <Loader2 className="animate-spin" /> : 'Get Started'}
+      </button>
     </div>
   </div>
 );
 
-const MainScreen = ({ user, onSignOut }) => {
-  const [topic, setTopic] = useState('');
-  const [explanation, setExplanation] = useState(null);
+// --- MAIN APP ---
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [view, setView] = useState('login'); // login, search, result
   const [isLoading, setIsLoading] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
+  const [result, setResult] = useState(null);
 
-  const showToast = (msg) => { console.log(msg); }; // Placeholder
-
-  const handleSearch = async (e) => {
-    if (e) e.preventDefault();
-    if (!topic.trim()) return;
-    setIsLoading(true); setExplanation(null);
+  // Handle Login
+  const handleLogin = async () => {
+    setIsLoading(true);
     try {
-      const response = await explainAPI.explain(topic, user.uid);
-      setExplanation(response.data);
-    } catch (error) {
-      console.error("Search error:", error);
-      showToast("Failed to get explanation. Please try again.");
+      const u = await mockLogin();
+      setUser(u);
+      setView('search');
+    } catch (err) {
+      toast.error("Login failed");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerify = async () => { 
-    if (!explanation) return; 
+  // Handle Search
+  const handleSearch = async (topic) => {
+    setIsLoading(true);
     try {
-      await verifyAPI.verify(explanation.topic, user.uid); 
-      showToast('Verification requested! It will appear in "Recent" soon.'); 
+      // Call Real API
+      const response = await explainAPI.explain(topic, user?.uid);
+      setResult(response.data);
+      setView('result');
     } catch (error) {
-      console.error("Verify error:", error);
-      showToast("Failed to request verification");
+      console.error(error);
+      toast.error("Could not generate explanation. Try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRegenerate = () => {
-    // In a real app, update user state
-    console.log("Regenerate nickname");
+  const handleCloseResult = () => {
+    setResult(null);
+    setView('search');
   };
 
   return (
-    <div className='max-w-3xl mx-auto p-4 sm:p-6'>
-      <header className='flex items-center justify-between py-4'>
-        <div className='flex items-center gap-2'>
-          <div className='w-10 h-10 bg-gradient-to-r from-amber-500 to-amber-400 rounded flex items-center justify-center'><Zap className='w-5 h-5 text-white' /></div>
-          <span className='text-xl text-white font-bold'>QuickLearn</span>
-        </div>
-        <button onClick={() => setShowProfile(true)} className='rounded-full w-10 h-10 overflow-hidden border-2 border-transparent hover:border-amber-400 transition-colors'>
-          <img src={avatarDataURI(user.avatarSeed)} className='w-full h-full' alt='avatar' />
-        </button>
-      </header>
-      
-      <h2 className='text-2xl text-white mt-6'>Welcome, <span className='text-amber-400'>{user.nickname}</span>!</h2>
-      <p className='text-slate-400 mt-2'>What do you want to learn today?</p>
-      
-      <form onSubmit={handleSearch} className='mt-6 relative'>
-        <input 
-          value={topic} 
-          onChange={(e) => setTopic(e.target.value)} 
-          placeholder="e.g., Photosynthesis" 
-          className='w-full h-14 rounded-xl bg-gray-800/50 px-4 pr-16 text-white border border-white/10 focus:border-amber-400 focus:outline-none' 
-        />
-        <button type='submit' className='absolute right-2 top-1/2 -translate-y-1/2 bg-amber-400 p-2 rounded-lg text-slate-900 hover:bg-amber-300 transition-colors'>
-          <Search className='w-5 h-5' />
-        </button>
-      </form>
-      
-      <div className='mt-6'>
-        {isLoading && <ResultSkeleton />}
-        {explanation && <ResultCard data={explanation} onVerify={handleVerify} showToast={showToast} />}
-      </div>
-      
-      <ProfileModal show={showProfile} user={user} onClose={() => setShowProfile(false)} onRegenerate={handleRegenerate} onSignOut={onSignOut} />
-    </div>
-  );
-};
+    <div className="bg-black min-h-screen text-white font-sans selection:bg-purple-500/30">
+      <Head>
+        <title>QuickLearn AI - Learn Fast</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
 
-export default function App() {
-  const [screen, setScreen] = useState('login');
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+      {/* Navbar (only when logged in) */}
+      {user && (
+        <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center pointer-events-none">
+          <div className="pointer-events-auto">
+            <Logo />
+          </div>
+          <div className="pointer-events-auto flex items-center gap-4">
+            <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+              <User className="w-5 h-5" />
+            </button>
+          </div>
+        </nav>
+      )}
 
-  const handleLogin = useCallback(async () => {
-    setIsLoading(true);
-    const u = await mockApi.login();
-    setUser(u);
-    setScreen('main');
-    setIsLoading(false);
-  }, []);
+      <AnimatePresence mode="wait">
+        {view === 'login' && (
+          <motion.div key="login" exit={{ opacity: 0 }}>
+            <LoginScreen onLogin={handleLogin} isLoading={isLoading} />
+          </motion.div>
+        )}
 
-  const handleSignOut = useCallback(() => { 
-    setUser(null); 
-    setScreen('login'); 
-  }, []);
+        {view === 'search' && (
+          <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <SearchScreen user={user} onSearch={handleSearch} isLoading={isLoading} />
+          </motion.div>
+        )}
 
-  return (
-    <div className="bg-gray-900 text-slate-100 min-h-screen antialiased relative overflow-hidden">
-        <Head>
-            <title>QuickLearn AI</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
-        </Head>
-        
-        {/* Background Gradient */}
-        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-amber-900/20 to-gray-900/0 blur-3xl pointer-events-none" />
-        
-        <div className="relative z-10">
-            <AnimatePresence mode="wait">
-                {screen === 'login' && (
-                    <motion.div key="login" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-                        <LoginScreen onLogin={handleLogin} isLoading={isLoading} />
-                    </motion.div>
-                )}
-                {screen === 'main' && user && (
-                    <motion.div key="main" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
-                        <MainScreen user={user} onSignOut={handleSignOut} />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+        {view === 'result' && result && (
+          <motion.div 
+            key="result"
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }}
+            className="min-h-screen flex items-center justify-center p-6 pt-24"
+          >
+            <ExplanationCard data={result} onClose={handleCloseResult} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
