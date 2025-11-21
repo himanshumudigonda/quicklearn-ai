@@ -608,8 +608,10 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Learn anything in 1 minute with AI-powered explanations" />
         <meta name="theme-color" content="#7c3aed" />
+        <link rel="icon" type="image/svg+xml" href="/icon0.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icon1.png" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
       </Head>
 
       {/* Navbar (only when logged in) */}
