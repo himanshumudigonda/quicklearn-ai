@@ -5,11 +5,11 @@ import {
   Search, Zap, Sparkles, BookOpen, Share2, 
   ThumbsUp, ThumbsDown, RotateCcw, X, 
   ChevronRight, Loader2, Menu, User, Flame, Trophy, Download,
-  Mail, Send, Heart, Github, Twitter
+  Mail, Send, Heart, Github, Twitter, LogOut, ChevronDown
 } from 'lucide-react';
 import { explainAPI, verifyAPI, authAPI, feedbackAPI } from '../lib/api';
 import { auth, googleProvider } from '../lib/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { toast } from 'react-hot-toast';
 import { getStreak, updateStreak, getStreakEmoji } from '../lib/streak';
 import { createMemeText } from '../lib/meme';
@@ -33,6 +33,62 @@ const Logo = () => (
     </span>
   </div>
 );
+
+const ProfileDropdown = ({ user, onSignOut }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+      >
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <User className="w-4 h-4 text-white" />
+        </div>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setIsOpen(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute right-0 mt-2 w-64 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+          >
+            <div className="p-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={user.avatar} 
+                  alt="Avatar" 
+                  className="w-12 h-12 rounded-full"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold truncate">{user.name}</p>
+                  <p className="text-gray-400 text-sm truncate">{user.email}</p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                onSignOut();
+              }}
+              className="w-full px-4 py-3 flex items-center gap-3 text-gray-300 hover:bg-white/5 transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Sign Out</span>
+            </button>
+          </motion.div>
+        </>
+      )}
+    </div>
+  );
+};
 
 const ExplanationCard = ({ data, onClose, user }) => {
   const { topic, content, source } = data;
@@ -390,6 +446,57 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [streak, setStreak] = useState({ currentStreak: 0, bestStreak: 0 });
+  const [authChecking, setAuthChecking] = useState(true);
+
+  // Check for existing Firebase session on mount
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is logged in, restore session
+        try {
+          const idToken = await firebaseUser.getIdToken();
+          let backendData = {};
+          
+          // Try to sync with backend
+          try {
+            const response = await authAPI.login(idToken);
+            backendData = response.data;
+            localStorage.setItem('session_token', backendData.sessionToken);
+          } catch (backendError) {
+            console.warn('Backend sync failed, using cached data');
+          }
+
+          const userData = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: backendData.nickname || firebaseUser.displayName,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendData.avatarSeed || firebaseUser.uid}`
+          };
+
+          // Save to localStorage as backup
+          localStorage.setItem('user_data', JSON.stringify(userData));
+          
+          setUser(userData);
+          setView('search');
+          
+          // Load streak data
+          const streakData = getStreak(firebaseUser.uid);
+          setStreak(streakData);
+        } catch (error) {
+          console.error('Session restore error:', error);
+        }
+      } else {
+        // No user logged in
+        setUser(null);
+        setView('login');
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('session_token');
+      }
+      setAuthChecking(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -397,6 +504,23 @@ export default function App() {
       setStreak(streakData);
     }
   }, [user]);
+
+  // Handle Sign Out
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setView('login');
+      setResult(null);
+      setStreak({ currentStreak: 0, bestStreak: 0 });
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('session_token');
+      toast.success('Signed out successfully');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast.error('Failed to sign out');
+    }
+  };
 
   // Handle Login
   const handleLogin = async () => {
@@ -417,12 +541,17 @@ export default function App() {
         toast.error("Connected in offline mode (Backend unavailable)");
       }
       
-      setUser({
+      const userData = {
         uid: result.user.uid,
+        email: result.user.email,
         name: backendData.nickname || result.user.displayName,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendData.avatarSeed || result.user.uid}`
-      });
+      };
+
+      // Save to localStorage
+      localStorage.setItem('user_data', JSON.stringify(userData));
       
+      setUser(userData);
       setView('search');
     } catch (err) {
       console.error("Login error:", err);
@@ -505,19 +634,21 @@ export default function App() {
                 </div>
               )}
             </motion.div>
-            <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-              <User className="w-5 h-5" />
-            </button>
+            <ProfileDropdown user={user} onSignOut={handleSignOut} />
           </div>
         </nav>
       )}
 
       <AnimatePresence mode="wait">
-        {view === 'login' && (
+        {authChecking ? (
+          <motion.div key="loading" className="min-h-screen flex items-center justify-center">
+            <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
+          </motion.div>
+        ) : view === 'login' ? (
           <motion.div key="login" exit={{ opacity: 0 }}>
             <LoginScreen onLogin={handleLogin} isLoading={isLoading} />
           </motion.div>
-        )}
+        ) : null}
 
         {view === 'search' && (
           <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
