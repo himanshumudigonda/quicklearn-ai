@@ -6,7 +6,7 @@ import {
   ThumbsUp, ThumbsDown, RotateCcw, X, 
   ChevronRight, Loader2, Menu, User, Flame, Trophy, Download
 } from 'lucide-react';
-import { explainAPI, verifyAPI, authAPI } from '../lib/api';
+import { explainAPI, verifyAPI, authAPI, feedbackAPI } from '../lib/api';
 import { auth, googleProvider } from '../lib/firebase';
 import { signInWithPopup } from 'firebase/auth';
 import { toast } from 'react-hot-toast';
@@ -33,21 +33,40 @@ const Logo = () => (
   </div>
 );
 
-const ExplanationCard = ({ data, onClose }) => {
+const ExplanationCard = ({ data, onClose, user }) => {
   const { topic, content, source } = data;
+  const [liked, setLiked] = useState(null); // null, 'like', or 'dislike'
+  
+  const handleLike = async (rating) => {
+    try {
+      await feedbackAPI.submit(user?.uid, topic, rating, null);
+      setLiked(rating);
+      toast.success(rating === 'like' ? '👍 Thanks for the feedback!' : '👎 We\'ll improve!');
+    } catch (error) {
+      console.error('Feedback error:', error);
+    }
+  };
   
   const handleGenerateMeme = () => {
     const meme = createMemeText(topic, content);
     const memeText = `${meme.title}\n\n${meme.subtitle}\n\n#QuickLearnAI #${topic.replace(/\s+/g, '')}`;
     
+    navigator.clipboard.writeText(memeText);
+    toast.success('Meme copied! 🎭 Paste it on Twitter/Instagram!');
+  };
+  
+  const handleShare = () => {
+    const shareText = `Learn ${topic} in 60 seconds with QuickLearn AI! 🚀`;
+    
     if (navigator.share) {
       navigator.share({
         title: `Learn ${topic}`,
-        text: memeText,
+        text: shareText,
+        url: window.location.href,
       }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(memeText);
-      toast.success('Meme text copied! Share it on social media! 🎉');
+      navigator.clipboard.writeText(`${shareText}\n\n${window.location.href}`);
+      toast.success('Link copied! Share with friends! 🔗');
     }
   };
   
@@ -109,8 +128,26 @@ const ExplanationCard = ({ data, onClose }) => {
       {/* Footer Actions */}
       <div className="p-6 bg-black/20 flex justify-between items-center flex-wrap gap-3">
         <div className="flex gap-2">
-          <button className="p-2 hover:text-green-400 transition-colors"><ThumbsUp className="w-5 h-5" /></button>
-          <button className="p-2 hover:text-red-400 transition-colors"><ThumbsDown className="w-5 h-5" /></button>
+          <button 
+            onClick={() => handleLike('like')}
+            className={`p-2 transition-all ${
+              liked === 'like' 
+                ? 'text-green-400 scale-110' 
+                : 'text-gray-400 hover:text-green-400'
+            }`}
+          >
+            <ThumbsUp className={`w-5 h-5 ${liked === 'like' ? 'fill-current' : ''}`} />
+          </button>
+          <button 
+            onClick={() => handleLike('dislike')}
+            className={`p-2 transition-all ${
+              liked === 'dislike' 
+                ? 'text-red-400 scale-110' 
+                : 'text-gray-400 hover:text-red-400'
+            }`}
+          >
+            <ThumbsDown className={`w-5 h-5 ${liked === 'dislike' ? 'fill-current' : ''}`} />
+          </button>
         </div>
         <div className="flex gap-3">
           <button 
@@ -119,7 +156,10 @@ const ExplanationCard = ({ data, onClose }) => {
           >
             <Sparkles className="w-4 h-4" /> Generate Meme
           </button>
-          <button className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
+          <button 
+            onClick={handleShare}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors border border-white/10 rounded-lg hover:border-white/20"
+          >
             <Share2 className="w-4 h-4" /> Share
           </button>
         </div>
@@ -396,7 +436,7 @@ export default function App() {
             animate={{ opacity: 1 }}
             className="min-h-screen flex items-center justify-center p-6 pt-24"
           >
-            <ExplanationCard data={result} onClose={handleCloseResult} />
+            <ExplanationCard data={result} onClose={handleCloseResult} user={user} />
           </motion.div>
         )}
       </AnimatePresence>
