@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, LogOut, RefreshCw } from 'lucide-react';
 import useStore from '@/lib/store';
@@ -55,7 +56,7 @@ export default function ProfileButton() {
 
   if (!user) {
     return (
-      <motion.button 
+      <motion.button
         onClick={handleSignIn}
         disabled={isSigningIn}
         className="px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
@@ -92,12 +93,13 @@ export default function ProfileButton() {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <motion.img
+        <Image
           src={avatarDataURI(avatarSeed)}
           alt="Avatar"
-          className="w-8 h-8 rounded-full"
-          whileHover={{ rotate: 15 }}
-          transition={{ duration: 0.3 }}
+          width={32}
+          height={32}
+          className="rounded-full"
+          unoptimized
         />
         <span className="font-semibold text-gray-900 hidden sm:inline">{nickname}</span>
       </motion.button>
@@ -125,10 +127,13 @@ export default function ProfileButton() {
               {/* Profile Header */}
               <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
                 <div className="relative">
-                  <img
+                  <Image
                     src={avatarDataURI(avatarSeed)}
                     alt="Avatar"
-                    className="w-16 h-16 rounded-full ring-2 ring-indigo-100"
+                    width={64}
+                    height={64}
+                    className="rounded-full ring-2 ring-indigo-100"
+                    unoptimized
                   />
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
                 </div>

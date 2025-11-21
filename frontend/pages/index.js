@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, Zap, Sparkles, BookOpen, Share2, 
-  ThumbsUp, ThumbsDown, RotateCcw, X, 
+
+import {
+  Search, Zap, Sparkles, BookOpen, Share2,
+  ThumbsUp, ThumbsDown, RotateCcw, X,
   ChevronRight, Loader2, Menu, User, Flame, Trophy, Download,
   Mail, Send, Heart, Github, Twitter, LogOut, ChevronDown
 } from 'lucide-react';
+import Image from 'next/image';
 import { explainAPI, verifyAPI, authAPI, feedbackAPI } from '../lib/api';
 import { auth, googleProvider } from '../lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
@@ -39,7 +41,7 @@ const ProfileDropdown = ({ user, onSignOut }) => {
 
   return (
     <div className="relative">
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
       >
@@ -51,8 +53,8 @@ const ProfileDropdown = ({ user, onSignOut }) => {
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
           <motion.div
@@ -62,10 +64,12 @@ const ProfileDropdown = ({ user, onSignOut }) => {
           >
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <img 
-                  src={user.avatar} 
-                  alt="Avatar" 
-                  className="w-12 h-12 rounded-full"
+                <Image
+                  src={user.avatar}
+                  alt="Avatar"
+                  width={48}
+                  height={48}
+                  className="rounded-full"
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-semibold truncate">{user.name}</p>
@@ -93,7 +97,7 @@ const ProfileDropdown = ({ user, onSignOut }) => {
 const ExplanationCard = ({ data, onClose, user }) => {
   const { topic, content, source } = data;
   const [liked, setLiked] = useState(null); // null, 'like', or 'dislike'
-  
+
   const handleLike = async (rating) => {
     try {
       await feedbackAPI.submit(user?.uid, topic, rating, null);
@@ -103,32 +107,32 @@ const ExplanationCard = ({ data, onClose, user }) => {
       console.error('Feedback error:', error);
     }
   };
-  
+
   const handleGenerateMeme = () => {
     const meme = createMemeText(topic, content);
     const memeText = `${meme.title}\n\n${meme.subtitle}\n\n#QuickLearnAI #${topic.replace(/\s+/g, '')}`;
-    
+
     navigator.clipboard.writeText(memeText);
     toast.success('Meme copied! 🎭 Paste it on Twitter/Instagram!');
   };
-  
+
   const handleShare = () => {
     const shareText = `Learn ${topic} in 60 seconds with QuickLearn AI! 🚀`;
-    
+
     if (navigator.share) {
       navigator.share({
         title: `Learn ${topic}`,
         text: shareText,
         url: window.location.href,
-      }).catch(() => {});
+      }).catch(() => { });
     } else {
       navigator.clipboard.writeText(`${shareText}\n\n${window.location.href}`);
       toast.success('Link copied! Share with friends! 🔗');
     }
   };
-  
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
@@ -185,35 +189,33 @@ const ExplanationCard = ({ data, onClose, user }) => {
       {/* Footer Actions */}
       <div className="p-4 md:p-6 bg-black/20 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
         <div className="flex gap-2 justify-center sm:justify-start">
-          <button 
+          <button
             onClick={() => handleLike('like')}
-            className={`p-2 transition-all ${
-              liked === 'like' 
-                ? 'text-green-400 scale-110' 
-                : 'text-gray-400 hover:text-green-400'
-            }`}
+            className={`p-2 transition-all ${liked === 'like'
+              ? 'text-green-400 scale-110'
+              : 'text-gray-400 hover:text-green-400'
+              }`}
           >
             <ThumbsUp className={`w-5 h-5 ${liked === 'like' ? 'fill-current' : ''}`} />
           </button>
-          <button 
+          <button
             onClick={() => handleLike('dislike')}
-            className={`p-2 transition-all ${
-              liked === 'dislike' 
-                ? 'text-red-400 scale-110' 
-                : 'text-gray-400 hover:text-red-400'
-            }`}
+            className={`p-2 transition-all ${liked === 'dislike'
+              ? 'text-red-400 scale-110'
+              : 'text-gray-400 hover:text-red-400'
+              }`}
           >
             <ThumbsDown className={`w-5 h-5 ${liked === 'dislike' ? 'fill-current' : ''}`} />
           </button>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <button 
+          <button
             onClick={handleGenerateMeme}
             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity w-full sm:w-auto"
           >
             <Sparkles className="w-4 h-4" /> Generate Meme
           </button>
-          <button 
+          <button
             onClick={handleShare}
             className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-colors border border-white/10 rounded-lg hover:border-white/20 w-full sm:w-auto"
           >
@@ -256,7 +258,7 @@ const SearchScreen = ({ user, onSearch, isLoading }) => {
           </p>
         </motion.div>
 
-        <motion.form 
+        <motion.form
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
@@ -274,7 +276,7 @@ const SearchScreen = ({ user, onSearch, isLoading }) => {
             className="w-full bg-transparent text-base md:text-xl text-white placeholder-gray-500 focus:outline-none h-10 md:h-12 pr-2"
             autoFocus
           />
-          <button 
+          <button
             type="submit"
             disabled={isLoading || !query.trim()}
             className={`px-4 md:px-8 py-2.5 md:py-3 rounded-lg md:rounded-xl bg-gradient-to-r ${gradients.primary} text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0`}
@@ -285,7 +287,7 @@ const SearchScreen = ({ user, onSearch, isLoading }) => {
         </motion.form>
 
         {/* Suggestions */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
@@ -319,7 +321,7 @@ const Footer = () => {
       // Using Formspree or mailto link
       const mailtoLink = `mailto:infinitetsukuyomi035@gmail.com?subject=QuickLearn AI Feedback&body=${encodeURIComponent(feedbackText)}`;
       window.location.href = mailtoLink;
-      
+
       toast.success('Opening your email client! 📧');
       setFeedbackText('');
     } catch (error) {
@@ -412,7 +414,7 @@ const LoginScreen = ({ onLogin, isLoading }) => (
       >
         <Zap className="w-12 h-12 text-white" />
       </motion.div>
-      
+
       <div>
         <h1 className="text-4xl font-bold text-white mb-2">QuickLearn AI</h1>
         <p className="text-gray-400">Your personal knowledge accelerator</p>
@@ -426,7 +428,12 @@ const LoginScreen = ({ onLogin, isLoading }) => (
         >
           {isLoading ? <Loader2 className="animate-spin" /> : (
             <>
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="G" />
+              <Image
+                src="https://www.svgrepo.com/show/475656/google-color.svg"
+                width={24}
+                height={24}
+                alt="G"
+              />
               Continue with Google
             </>
           )}
@@ -452,38 +459,61 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // User is logged in, restore session
+        // User is logged in, restore session IMMEDIATELY from cache
         try {
-          const idToken = await firebaseUser.getIdToken();
-          let backendData = {};
-          
-          // Try to sync with backend
-          try {
-            const response = await authAPI.login(idToken);
-            backendData = response.data;
-            localStorage.setItem('session_token', backendData.sessionToken);
-          } catch (backendError) {
-            console.warn('Backend sync failed, using cached data');
+          // Try to get cached user data first (instant load)
+          const cachedUserData = localStorage.getItem('user_data');
+
+          if (cachedUserData) {
+            // Load from cache immediately (0ms delay!)
+            const userData = JSON.parse(cachedUserData);
+            setUser(userData);
+            setView('search');
+
+            const streakData = getStreak(firebaseUser.uid);
+            setStreak(streakData);
+            setAuthChecking(false);
+          } else {
+            // No cache, set loading state
+            setAuthChecking(false);
           }
 
-          const userData = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: backendData.nickname || firebaseUser.displayName,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendData.avatarSeed || firebaseUser.uid}`
-          };
+          // Sync with backend in background (non-blocking)
+          const idToken = await firebaseUser.getIdToken();
+          authAPI.login(idToken)
+            .then(response => {
+              const backendData = response.data;
+              localStorage.setItem('session_token', backendData.sessionToken);
 
-          // Save to localStorage as backup
-          localStorage.setItem('user_data', JSON.stringify(userData));
-          
-          setUser(userData);
-          setView('search');
-          
-          // Load streak data
-          const streakData = getStreak(firebaseUser.uid);
-          setStreak(streakData);
+              // Update user data if backend returns different info
+              const userData = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                name: backendData.nickname || firebaseUser.displayName,
+                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendData.avatarSeed || firebaseUser.uid}`
+              };
+
+              localStorage.setItem('user_data', JSON.stringify(userData));
+              setUser(userData);
+            })
+            .catch(error => {
+              console.warn('Backend sync failed (using Firebase data only):', error);
+              // Use Firebase data if backend fails
+              if (!cachedUserData) {
+                const userData = {
+                  uid: firebaseUser.uid,
+                  email: firebaseUser.email,
+                  name: firebaseUser.displayName,
+                  avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`
+                };
+                localStorage.setItem('user_data', JSON.stringify(userData));
+                setUser(userData);
+                setView('search');
+              }
+            });
         } catch (error) {
           console.error('Session restore error:', error);
+          setAuthChecking(false);
         }
       } else {
         // No user logged in
@@ -491,8 +521,8 @@ export default function App() {
         setView('login');
         localStorage.removeItem('user_data');
         localStorage.removeItem('session_token');
+        setAuthChecking(false);
       }
-      setAuthChecking(false);
     });
 
     return () => unsubscribe();
@@ -528,42 +558,52 @@ export default function App() {
     try {
       // 1. Google Sign In
       const result = await signInWithPopup(auth, googleProvider);
-      const idToken = await result.user.getIdToken();
-      
-      let backendData = {};
-      try {
-        // 2. Backend Sync (Optional)
-        const response = await authAPI.login(idToken);
-        backendData = response.data;
-        localStorage.setItem('session_token', backendData.sessionToken);
-      } catch (backendError) {
-        console.warn("Backend sync failed, continuing in offline mode:", backendError);
-        toast.error("Connected in offline mode (Backend unavailable)");
-      }
-      
+
+      // 2. Set user IMMEDIATELY (don't wait for backend!)
       const userData = {
         uid: result.user.uid,
         email: result.user.email,
-        name: backendData.nickname || result.user.displayName,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendData.avatarSeed || result.user.uid}`
+        name: result.user.displayName,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.user.uid}`
       };
 
-      // Save to localStorage
       localStorage.setItem('user_data', JSON.stringify(userData));
-      
       setUser(userData);
       setView('search');
+      setIsLoading(false);
+
+      // 3. Sync with backend in background (non-blocking)
+      const idToken = await result.user.getIdToken();
+      authAPI.login(idToken)
+        .then(response => {
+          const backendData = response.data;
+          localStorage.setItem('session_token', backendData.sessionToken);
+
+          // Update with backend nickname/avatar if different
+          const updatedUserData = {
+            ...userData,
+            name: backendData.nickname || userData.name,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendData.avatarSeed || result.user.uid}`
+          };
+
+          localStorage.setItem('user_data', JSON.stringify(updatedUserData));
+          setUser(updatedUserData);
+        })
+        .catch(backendError => {
+          console.warn("Backend sync failed (app works fine without it):", backendError);
+        });
+
     } catch (err) {
       console.error("Login error:", err);
+      setIsLoading(false);
+
       if (err.code === 'auth/popup-closed-by-user') {
         toast.error("Login cancelled");
       } else if (err.code === 'auth/unauthorized-domain') {
         toast.error("Domain not authorized in Firebase Console");
       } else {
-        toast.error("Login failed. Try Guest Mode.");
+        toast.error("Login failed. Please try again.");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -577,11 +617,11 @@ export default function App() {
       const response = await explainAPI.explain(topic, user?.uid);
       setResult(response.data);
       setView('result');
-      
+
       // Update streak when user learns something
       const newStreak = updateStreak(user.uid);
       setStreak(newStreak);
-      
+
       // Show celebration for milestones
       if (newStreak.currentStreak % 7 === 0) {
         toast.success(`🔥 ${newStreak.currentStreak} day streak! You're on fire!`, { duration: 4000 });
@@ -623,7 +663,7 @@ export default function App() {
           </div>
           <div className="pointer-events-auto flex items-center gap-2 md:gap-4">
             {/* Streak Display */}
-            <motion.div 
+            <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               className="flex items-center gap-1.5 md:gap-2 bg-gradient-to-r from-orange-500 to-red-500 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full shadow-lg"
@@ -661,9 +701,9 @@ export default function App() {
         )}
 
         {view === 'result' && result && (
-          <motion.div 
+          <motion.div
             key="result"
-            initial={{ opacity: 0 }} 
+            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="min-h-screen flex flex-col items-center justify-center p-3 md:p-6 pt-20 md:pt-24"
           >

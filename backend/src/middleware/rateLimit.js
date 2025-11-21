@@ -26,7 +26,7 @@ class UserRateLimiter {
     this.limiter = new RateLimiterRedis({
       storeClient: redis,
       keyPrefix: 'rate:user',
-      points: parseInt(process.env.USER_RATE_LIMIT || 200), // requests
+      points: parseInt(process.env.USER_RATE_LIMIT || 5000), // requests
       duration: 86400, // per day
       blockDuration: 60, // block for 60 seconds if exceeded
     });

@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    unoptimized: true,
+    domains: ['api.dicebear.com', 'www.svgrepo.com'],
   },
   // Ensure environment variables are available
   env: {

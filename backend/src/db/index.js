@@ -7,13 +7,13 @@ async function setupDatabase() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL not configured');
   }
-  
+
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    max: 50, // Increased max connections
+    idleTimeoutMillis: 30000, // Increased idle timeout to 30s
+    connectionTimeoutMillis: 5000, // Increased connection timeout to 5s
   });
 
   // Test connection
