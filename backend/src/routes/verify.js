@@ -2,12 +2,16 @@ const express = require('express');
 const router = express.Router();
 const { Queue } = require('bullmq');
 const { query } = require('../db');
-const { getRedis } = require('../cache');
 const logger = require('../utils/logger');
+const Redis = require('ioredis');
 
 // Initialize job queue
+const connection = new Redis(process.env.REDIS_URL, {
+  maxRetriesPerRequest: null, // Required by BullMQ
+});
+
 const jobQueue = new Queue(process.env.QUEUE_NAME || 'quicklearn-jobs', {
-  connection: getRedis(),
+  connection,
 });
 
 // POST /api/verify - Request verification for a topic
