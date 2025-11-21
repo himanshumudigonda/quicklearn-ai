@@ -2,11 +2,12 @@ services:
   # Backend API Service
   - type: web
     name: quicklearn-backend
-    env: node
+    runtime: node
     region: oregon
     plan: free
-    buildCommand: bash build.sh
-    startCommand: bash start.sh
+    branch: main
+    buildCommand: ./build.sh
+    startCommand: ./start.sh
     envVars:
       - key: NODE_ENV
         value: production

@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
+set -e
+echo "==> Starting QuickLearn AI Backend..."
 cd backend
-node src/server.js
+exec node src/server.js
+
