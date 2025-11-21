@@ -60,45 +60,71 @@ const KEYS = {
 
 // Cache explanation
 async function cacheExplanation(topic, content, ttl = null) {
+  if (!redis) return;
   const key = KEYS.hot(topic);
   const defaultTTL = content.verified 
     ? parseInt(process.env.CACHE_TTL_VERIFIED || 15552000)
     : parseInt(process.env.CACHE_TTL_NORMAL || 604800);
   
-  await redis.setex(key, ttl || defaultTTL, JSON.stringify(content));
+  try {
+    await redis.setex(key, ttl || defaultTTL, JSON.stringify(content));
+  } catch (e) {
+    logger.warn('Redis set failed:', e.message);
+  }
 }
 
 // Get cached explanation
 async function getCachedExplanation(topic) {
-  const key = KEYS.hot(topic);
-  const cached = await redis.get(key);
-  return cached ? JSON.parse(cached) : null;
+  if (!redis) return null;
+  try {
+    const key = KEYS.hot(topic);
+    const cached = await redis.get(key);
+    return cached ? JSON.parse(cached) : null;
+  } catch (e) {
+    logger.warn('Redis get failed:', e.message);
+    return null;
+  }
 }
 
 // Increment model counter
 async function incrementModelCounter(model, tokens = 1) {
-  const key = KEYS.modelCounter(model);
-  await redis.incrby(key, tokens);
-  await redis.expire(key, 86400); // 24 hours
+  if (!redis) return;
+  try {
+    const key = KEYS.modelCounter(model);
+    await redis.incrby(key, tokens);
+    await redis.expire(key, 86400); // 24 hours
+  } catch (e) {
+    // Ignore
+  }
 }
 
 // Get model counter
 async function getModelCounter(model) {
-  const key = KEYS.modelCounter(model);
-  const count = await redis.get(key);
-  return count ? parseInt(count) : 0;
+  if (!redis) return 0;
+  try {
+    const key = KEYS.modelCounter(model);
+    const count = await redis.get(key);
+    return count ? parseInt(count) : 0;
+  } catch (e) {
+    return 0;
+  }
 }
 
 // Rate limiting helpers
 async function checkRateLimit(userId, limit, window) {
-  const key = userId ? KEYS.rateUser(userId) : KEYS.rateGlobal();
-  const current = await redis.incr(key);
-  
-  if (current === 1) {
-    await redis.expire(key, window);
+  if (!redis) return true; // Allow if Redis down
+  try {
+    const key = userId ? KEYS.rateUser(userId) : KEYS.rateGlobal();
+    const current = await redis.incr(key);
+    
+    if (current === 1) {
+      await redis.expire(key, window);
+    }
+    
+    return current <= limit;
+  } catch (e) {
+    return true;
   }
-  
-  return current <= limit;
 }
 
 module.exports = {

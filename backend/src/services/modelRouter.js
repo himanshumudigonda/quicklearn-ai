@@ -26,12 +26,12 @@ const MODEL_CHAIN = [
   { name: 'llama-3.3-70b-versatile', provider: 'groq', model: 'llama-3.3-70b-versatile', cost: 5, tier: 'powerful' },
   { name: 'moonshotai/kimi-k2-instruct', provider: 'groq', model: 'kimi-k2-instruct', cost: 5, tier: 'powerful' },
   
-  // Tier 6: Premium OpenAI models
-  { name: 'openai/gpt-oss-20b', provider: 'openai', model: 'gpt-oss-20b', cost: 6, tier: 'powerful' },
-  { name: 'openai/gpt-oss-safeguard-20b', provider: 'openai', model: 'gpt-oss-safeguard-20b', cost: 6, tier: 'powerful' },
-  { name: 'openai/gpt-oss-120b', provider: 'openai', model: 'gpt-oss-120b', cost: 8, tier: 'premium' },
+  // Tier 6: Premium OpenAI models (via Groq)
+  { name: 'openai/gpt-oss-20b', provider: 'groq', model: 'gpt-oss-20b', cost: 6, tier: 'powerful' },
+  { name: 'openai/gpt-oss-safeguard-20b', provider: 'groq', model: 'gpt-oss-safeguard-20b', cost: 6, tier: 'powerful' },
+  { name: 'openai/gpt-oss-120b', provider: 'groq', model: 'gpt-oss-120b', cost: 8, tier: 'premium' },
   
-  // Tier 7: Fallback OpenAI models
+  // Tier 7: Fallback OpenAI models (Direct)
   { name: 'openai/gpt-4o-mini', provider: 'openai', model: 'gpt-4o-mini', cost: 7, tier: 'powerful' },
   { name: 'openai/gpt-4o', provider: 'openai', model: 'gpt-4o', cost: 10, tier: 'premium' },
 ];

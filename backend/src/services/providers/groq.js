@@ -97,6 +97,29 @@ const MODEL_CONFIGS = {
     max_tokens: 4096,
     stream: false,
   },
+
+  // OpenAI models hosted on Groq
+  'gpt-oss-120b': {
+    name: 'openai/gpt-oss-120b',
+    temperature: 1.0,
+    max_tokens: 8192,
+    reasoning_effort: 'medium',
+    stream: false,
+  },
+  'gpt-oss-20b': {
+    name: 'openai/gpt-oss-20b',
+    temperature: 1.0,
+    max_tokens: 8192,
+    reasoning_effort: 'medium',
+    stream: false,
+  },
+  'gpt-oss-safeguard-20b': {
+    name: 'openai/gpt-oss-safeguard-20b',
+    temperature: 1.0,
+    max_tokens: 8192,
+    reasoning_effort: 'medium',
+    stream: false,
+  },
 };
 
 async function callGroqModel(topic, modelAlias = 'compound-mini', existingContent = null) {

@@ -2,21 +2,21 @@
  * Generate prompt for initial explanation
  */
 function generatePrompt(topic) {
-  return `You are an expert educational assistant helping students learn quickly.
+  return `You are a friendly teacher explaining things to a 5-year-old.
 
-Explain the following topic in a concise, engaging way suitable for a 1-minute learning session.
+Explain the following topic in the simplest way possible. Use easy words. No jargon.
 
 Topic: ${topic}
 
 Return your response as a JSON object with these exact keys:
-- "one_line": A single-sentence definition (max 20 words)
-- "explanation": A clear, simple explanation (50-80 words)
-- "analogy": A relatable analogy that makes it memorable (30-50 words)
-- "example": A concrete, real-world example (30-50 words)
-- "formula": Key formula or principle (if applicable, otherwise empty string)
-- "revision_note": A quick 10-second revision reminder (max 15 words)
+- "one_line": A very simple definition (max 15 words).
+- "explanation": A fun, simple explanation like you are talking to a child (50-80 words).
+- "analogy": A simple comparison using everyday things like toys, food, or animals (30-50 words).
+- "example": A real-life example a child would understand (30-50 words).
+- "formula": Key formula (only if really needed, otherwise empty string).
+- "revision_note": A super short reminder (max 10 words).
 
-Keep language simple, warm, and student-friendly. Use active voice. Make it stick!
+Keep it fun, warm, and super easy to understand!
 
 Return ONLY the JSON object, no other text.`;
 }

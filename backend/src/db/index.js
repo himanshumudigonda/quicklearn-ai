@@ -102,7 +102,8 @@ async function createTables() {
 
 function getPool() {
   if (!pool) {
-    throw new Error('Database not initialized. Call setupDatabase first.');
+    // throw new Error('Database not initialized. Call setupDatabase first.');
+    return null;
   }
   return pool;
 }
@@ -110,5 +111,11 @@ function getPool() {
 module.exports = {
   setupDatabase,
   getPool,
-  query: (text, params) => pool.query(text, params),
+  query: async (text, params) => {
+    if (!pool) {
+      logger.warn('Database query skipped (DB not connected)');
+      return { rows: [], rowCount: 0 };
+    }
+    return pool.query(text, params);
+  },
 };
