@@ -5,6 +5,7 @@
   "description": "A quick learning app for bite-sized knowledge.",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "icons": [
@@ -22,14 +23,16 @@
   "categories": ["education", "productivity"],
   "screenshots": [
     {
-      "src": "/screenshot1.png",
+      "src": "screenshot1.jpg",
       "sizes": "1280x720",
-      "type": "image/png"
+      "type": "image/jpg",
+      "platform": "wide"
     },
     {
-      "src": "/screenshot2.png",
+      "src": "screenshot2.jpg",
       "sizes": "1280x720",
-      "type": "image/png"
+      "type": "image/jpg",
+      "platform": "wide"
     }
   ],
   "scope": "/",
@@ -42,5 +45,24 @@
     }
   ],
   "lang": "en",
-  "dir": "ltr"
+  "dir": "ltr",
+  "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "Learn Black Holes",
+      "url": "/topics/black-holes",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Learn Machine Learning",
+      "url": "/topics/machine-learning",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "quicklearn",
+      "url": "/?q=%s"
+    }
+  ]
 }
